@@ -1,24 +1,25 @@
-import { Switch, Route } from "wouter";
-import { queryClient } from "./lib/queryClient";
-import { QueryClientProvider } from "@tanstack/react-query";
-import { Toaster } from "@/components/ui/toaster";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/app-sidebar";
-import { ThemeProvider } from "@/components/theme-provider";
-import { ThemeToggle } from "@/components/theme-toggle";
-import { ProtectedRoute } from "@/components/protected-route";
-import { GA4Tracking } from "@/components/ga4-tracking";
-import Dashboard from "@/pages/dashboard";
-import Usage from "@/pages/usage";
-import Cost from "@/pages/cost";
-import KnowledgeBase from "@/pages/knowledge-base";
-import KnowledgeBaseExporter from "@/pages/knowledge-base-exporter";
-import Transcripts from "@/pages/transcripts";
-import AiAnalysis from "@/pages/ai-analysis";
-import Settings from "@/pages/settings";
-import Login from "@/pages/login";
-import NotFound from "@/pages/not-found";
+import type React from "react"
+import { Switch, Route } from "wouter"
+import { queryClient } from "./lib/queryClient"
+import { QueryClientProvider } from "@tanstack/react-query"
+import { Toaster } from "@/components/ui/toaster"
+import { TooltipProvider } from "@/components/ui/tooltip"
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
+import { AppSidebar } from "@/components/app-sidebar"
+import { ThemeProvider } from "@/components/theme-provider"
+import { ThemeToggle } from "@/components/theme-toggle"
+import { ProtectedRoute } from "@/components/protected-route"
+import { GA4Tracking } from "@/components/ga4-tracking"
+import Dashboard from "@/pages/dashboard"
+import Usage from "@/pages/usage"
+import Cost from "@/pages/cost"
+import KnowledgeBase from "@/pages/knowledge-base"
+import KnowledgeBaseExporter from "@/pages/knowledge-base-exporter"
+import Transcripts from "@/pages/transcripts"
+import AiAnalysis from "@/pages/ai-analysis"
+import Settings from "@/pages/settings"
+import Login from "@/pages/login"
+import NotFound from "@/pages/not-found"
 
 function Router() {
   return (
@@ -66,14 +67,14 @@ function Router() {
       </Route>
       <Route component={NotFound} />
     </Switch>
-  );
+  )
 }
 
 function App() {
   const style = {
     "--sidebar-width": "16rem",
     "--sidebar-width-icon": "3rem",
-  };
+  }
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -94,7 +95,7 @@ function App() {
                         <ThemeToggle />
                       </div>
                     </header>
-                    <main className="flex-1 overflow-hidden">
+                    <main className="flex-1 overflow-y-auto">
                       <GA4Tracking />
                       <Router />
                     </main>
@@ -107,7 +108,7 @@ function App() {
         </TooltipProvider>
       </ThemeProvider>
     </QueryClientProvider>
-  );
+  )
 }
 
-export default App;
+export default App
