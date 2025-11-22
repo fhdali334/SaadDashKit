@@ -1,0 +1,162 @@
+[
+  {
+    "id": "37424337-dbc2-413f-8e0c-16b953810dd9",
+    "analysisId": "3c13459e-a456-456a-b1b2-1ee24a342abc",
+    "keyword": "appointment",
+    "frequency": 1,
+    "relevanceScore": 0.8,
+    "category": "service"
+  },
+  {
+    "id": "b789fdc9-b429-4fc1-8363-872c64a3a634",
+    "analysisId": "3c13459e-a456-456a-b1b2-1ee24a342abc",
+    "keyword": "gym",
+    "frequency": 4,
+    "relevanceScore": 0.9,
+    "category": "facility"
+  },
+  {
+    "id": "f284c465-7f74-4b18-b92c-d33ff64e38d8",
+    "analysisId": "3c13459e-a456-456a-b1b2-1ee24a342abc",
+    "keyword": "hours",
+    "frequency": 1,
+    "relevanceScore": 0.7,
+    "category": "information"
+  },
+  {
+    "id": "91bf3f77-4c20-47d6-a53c-78a6af9a3c18",
+    "analysisId": "3c13459e-a456-456a-b1b2-1ee24a342abc",
+    "keyword": "rules",
+    "frequency": 1,
+    "relevanceScore": 0.85,
+    "category": "policy"
+  },
+  {
+    "id": "54c82d8f-f480-4c7b-9419-d270132ba915",
+    "analysisId": "3c13459e-a456-456a-b1b2-1ee24a342abc",
+    "keyword": "membership",
+    "frequency": 1,
+    "relevanceScore": 0.8,
+    "category": "service"
+  },
+  {
+    "id": "9a9e49fa-85b5-48ad-93c4-9ed931b517e7",
+    "analysisId": "99bfd686-3304-4859-a946-871f83c45653",
+    "keyword": "appointment",
+    "frequency": 1,
+    "relevanceScore": 0.8,
+    "category": "service"
+  },
+  {
+    "id": "7a227220-d74a-47f0-9594-0444813becc2",
+    "analysisId": "99bfd686-3304-4859-a946-871f83c45653",
+    "keyword": "gym",
+    "frequency": 4,
+    "relevanceScore": 0.9,
+    "category": "facility"
+  },
+  {
+    "id": "145e6cc1-02cc-4999-a8a0-8aa84e30887e",
+    "analysisId": "99bfd686-3304-4859-a946-871f83c45653",
+    "keyword": "hours",
+    "frequency": 1,
+    "relevanceScore": 0.7,
+    "category": "information"
+  },
+  {
+    "id": "5d70aa3f-4020-4102-b20c-183f3a57f759",
+    "analysisId": "99bfd686-3304-4859-a946-871f83c45653",
+    "keyword": "rules",
+    "frequency": 1,
+    "relevanceScore": 0.85,
+    "category": "policy"
+  },
+  {
+    "id": "74d040ff-cab1-4013-a7cf-b0ef02dde3f2",
+    "analysisId": "99bfd686-3304-4859-a946-871f83c45653",
+    "keyword": "membership",
+    "frequency": 1,
+    "relevanceScore": 0.75,
+    "category": "service"
+  },
+  {
+    "id": "553b6b4e-59b3-4652-a241-8308c02e6ebf",
+    "analysisId": "a8f75252-6ae2-4bde-9f15-d801baf49035",
+    "keyword": "appointment",
+    "frequency": 1,
+    "relevanceScore": 0.8,
+    "category": "service"
+  },
+  {
+    "id": "5517836d-8c09-4642-b656-7a8b9bcadf72",
+    "analysisId": "a8f75252-6ae2-4bde-9f15-d801baf49035",
+    "keyword": "gym",
+    "frequency": 3,
+    "relevanceScore": 0.9,
+    "category": "service"
+  },
+  {
+    "id": "fab0d1e1-7618-4566-acf4-f2cdb2cdd24a",
+    "analysisId": "a8f75252-6ae2-4bde-9f15-d801baf49035",
+    "keyword": "hours",
+    "frequency": 1,
+    "relevanceScore": 0.7,
+    "category": "information"
+  },
+  {
+    "id": "1d4f1190-98f0-4daf-a9c6-65087b8bfb0a",
+    "analysisId": "a8f75252-6ae2-4bde-9f15-d801baf49035",
+    "keyword": "rules",
+    "frequency": 1,
+    "relevanceScore": 0.6,
+    "category": "information"
+  },
+  {
+    "id": "a7de082a-7d32-44aa-8e2f-1fd8be6ffc05",
+    "analysisId": "a8f75252-6ae2-4bde-9f15-d801baf49035",
+    "keyword": "membership",
+    "frequency": 1,
+    "relevanceScore": 0.7,
+    "category": "service"
+  },
+  {
+    "id": "bd7c8c56-b55b-4d71-95d2-5b632865371f",
+    "analysisId": "acd97421-a53a-4937-9b3c-03fb7befc509",
+    "keyword": "appointment",
+    "frequency": 1,
+    "relevanceScore": 0.8,
+    "category": "service"
+  },
+  {
+    "id": "d86bad92-cf25-4b1b-911f-40a72a03eb8d",
+    "analysisId": "acd97421-a53a-4937-9b3c-03fb7befc509",
+    "keyword": "gym",
+    "frequency": 5,
+    "relevanceScore": 0.9,
+    "category": "service"
+  },
+  {
+    "id": "9145add5-f511-419d-b033-0eeb1a05a873",
+    "analysisId": "acd97421-a53a-4937-9b3c-03fb7befc509",
+    "keyword": "hours",
+    "frequency": 1,
+    "relevanceScore": 0.7,
+    "category": "information"
+  },
+  {
+    "id": "1aa5f52e-b710-4f55-bf81-c8667b288fb5",
+    "analysisId": "acd97421-a53a-4937-9b3c-03fb7befc509",
+    "keyword": "rules",
+    "frequency": 1,
+    "relevanceScore": 0.85,
+    "category": "policy"
+  },
+  {
+    "id": "c232f17d-b07f-42ae-bb04-99c6d2d9ce26",
+    "analysisId": "acd97421-a53a-4937-9b3c-03fb7befc509",
+    "keyword": "membership",
+    "frequency": 1,
+    "relevanceScore": 0.75,
+    "category": "service"
+  }
+]

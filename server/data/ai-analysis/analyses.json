@@ -1,0 +1,42 @@
+[
+  {
+    "id": "3c13459e-a456-456a-b1b2-1ee24a342abc",
+    "projectId": "66aeff0ea380c590e96e8e70",
+    "analysisDate": "2025-11-16T16:43:02.267Z",
+    "conversionRate": 0.2,
+    "averageSentiment": 0.5,
+    "totalTranscripts": 13,
+    "reportUrl": "/api/ai-analysis/report/ai-analysis-report-1763311382173.docx",
+    "createdAt": "2025-11-16T16:43:02.272Z"
+  },
+  {
+    "id": "99bfd686-3304-4859-a946-871f83c45653",
+    "projectId": "66aeff0ea380c590e96e8e70",
+    "analysisDate": "2025-11-17T23:21:53.926Z",
+    "conversionRate": 0.2,
+    "averageSentiment": 0.5,
+    "totalTranscripts": 13,
+    "reportUrl": "/api/ai-analysis/report/ai-analysis-report-1763421713859.docx",
+    "createdAt": "2025-11-17T23:21:53.926Z"
+  },
+  {
+    "id": "a8f75252-6ae2-4bde-9f15-d801baf49035",
+    "projectId": "66aeff0ea380c590e96e8e70",
+    "analysisDate": "2025-11-18T01:12:27.011Z",
+    "conversionRate": 0.2,
+    "averageSentiment": 0.5,
+    "totalTranscripts": 13,
+    "reportUrl": "/api/ai-analysis/report/ai-analysis-report-1763428346902.docx",
+    "createdAt": "2025-11-18T01:12:27.011Z"
+  },
+  {
+    "id": "acd97421-a53a-4937-9b3c-03fb7befc509",
+    "projectId": "66aeff0ea380c590e96e8e70",
+    "analysisDate": "2025-11-18T01:12:39.990Z",
+    "conversionRate": 0.2,
+    "averageSentiment": 0.5,
+    "totalTranscripts": 13,
+    "reportUrl": "/api/ai-analysis/report/ai-analysis-report-1763428359951.docx",
+    "createdAt": "2025-11-18T01:12:39.991Z"
+  }
+]

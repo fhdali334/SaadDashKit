@@ -1,0 +1,14 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../TranscriptView"
+		},
+		{
+			"path": "../vf-knowledge-base-exporter"
+		}
+	],
+	"settings": {}
+}

@@ -1,0 +1,29 @@
+transcriptID,sessionID,role,message,logCreatedAt
+6917ce472927a48b97d23fee,s5vf7zxtql6gy7avlcadwfzk,user,hello,2025-11-15T00:50:24.316Z
+6917ce472927a48b97d23fee,s5vf7zxtql6gy7avlcadwfzk,ai,"I'd be happy to help you book a session! To get started, I'll need to check what appointment slots are available for you.
+
+Could you please provide:
+1. Your phone number (with country code, e.g., +15551234567)
+2. Your user ID (if you know it, otherwise I can use a default)
+
+Once I have this information, I can show you the available time slots for booking.",2025-11-15T00:50:30.621Z
+68f917239b4ec4c0df43e553,s5ajhw9cm80llujqkpw85d0p,ai,"Hi, how can I help you? What question do you have?",2025-10-22T17:40:56.427Z
+68f917239b4ec4c0df43e553,s5ajhw9cm80llujqkpw85d0p,user,what are gym hours,2025-10-22T17:41:03.666Z
+68f917239b4ec4c0df43e553,s5ajhw9cm80llujqkpw85d0p,ai,The gym opens at 11 AM and typically closes at 7 PM every day.,2025-10-22T17:41:05.269Z
+68eeaa5d632433342ddc6898,13436305914,user,hellop,2025-10-14T19:54:05.474Z
+68eeaa5d632433342ddc6898,13436305914,ai,Hello! How can I assist you today?,2025-10-14T19:54:09.027Z
+68e7d717fdc62ac67734763b,13436305914,user,hi,2025-10-09T15:39:03.684Z
+68e7d717fdc62ac67734763b,13436305914,ai,Hi! How can I help you today?,2025-10-09T15:39:04.834Z
+68e6b40afdc62ac677305b02,13436305914,ai,"Hi, how can I help you?",2025-10-08T18:57:15.043Z
+68e6b40afdc62ac677305b02,13436305914,user,hello,2025-10-08T18:57:15.514Z
+68e6b40afdc62ac677305b02,13436305914,ai,Hi there! How can I assist you today?,2025-10-08T18:57:16.275Z
+68e6b40afdc62ac677305b02,13436305914,user,whats the rules of the gym?,2025-10-08T19:04:27.808Z
+68e6b40afdc62ac677305b02,13436305914,ai,"At our gym, we have a few key rules to ensure a safe and enjoyable environment for everyone:
+
+1. **Mouthguards are mandatory** for all sparring sessions.
+2. **Heavy sparring** requires proven control and technique.
+3. Please respect the equipment and clean up after yourself.
+4. Follow the coach's instructions during training sessions.
+5. Memberships can be canceled online if requested.
+
+If you have any specific questions or need more details, feel free to ask!",2025-10-08T19:04:31.630Z

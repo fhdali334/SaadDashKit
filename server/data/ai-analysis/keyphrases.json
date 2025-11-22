@@ -1,0 +1,130 @@
+[
+  {
+    "id": "76cf73a0-4113-4216-a11f-b8a6d09f9ab0",
+    "analysisId": "3c13459e-a456-456a-b1b2-1ee24a342abc",
+    "keyphrase": "booking a session",
+    "frequency": 1,
+    "relevanceScore": 0.9,
+    "context": "User inquires about scheduling an appointment."
+  },
+  {
+    "id": "da0d3b56-8bbf-41b8-b878-1cc7575fcc37",
+    "analysisId": "3c13459e-a456-456a-b1b2-1ee24a342abc",
+    "keyphrase": "gym hours",
+    "frequency": 1,
+    "relevanceScore": 0.7,
+    "context": "User asks for the operating hours of the gym."
+  },
+  {
+    "id": "7f7a1be6-8c21-474e-9132-c4d2f83016ac",
+    "analysisId": "3c13459e-a456-456a-b1b2-1ee24a342abc",
+    "keyphrase": "rules of the gym",
+    "frequency": 1,
+    "relevanceScore": 0.85,
+    "context": "User requests information about gym policies."
+  },
+  {
+    "id": "ae037929-7a7b-4cbc-a417-26519485f84b",
+    "analysisId": "3c13459e-a456-456a-b1b2-1ee24a342abc",
+    "keyphrase": "cancel memberships online",
+    "frequency": 1,
+    "relevanceScore": 0.8,
+    "context": "User is informed about the membership cancellation process."
+  },
+  {
+    "id": "eba74628-dbaa-4c78-9171-90027939a0e7",
+    "analysisId": "99bfd686-3304-4859-a946-871f83c45653",
+    "keyphrase": "book a session",
+    "frequency": 1,
+    "relevanceScore": 0.8,
+    "context": "User inquiry about booking an appointment."
+  },
+  {
+    "id": "528a96d5-5e80-4c29-8a80-49cfb6ede388",
+    "analysisId": "99bfd686-3304-4859-a946-871f83c45653",
+    "keyphrase": "gym hours",
+    "frequency": 1,
+    "relevanceScore": 0.7,
+    "context": "User asking for the operational hours of the gym."
+  },
+  {
+    "id": "6f905d71-d3ee-471e-afa5-df2abb17f58b",
+    "analysisId": "99bfd686-3304-4859-a946-871f83c45653",
+    "keyphrase": "rules of the gym",
+    "frequency": 1,
+    "relevanceScore": 0.85,
+    "context": "User inquiring about the gym's rules."
+  },
+  {
+    "id": "be3e528f-47f8-4fc5-9612-76c931a358a1",
+    "analysisId": "99bfd686-3304-4859-a946-871f83c45653",
+    "keyphrase": "cancel memberships online",
+    "frequency": 1,
+    "relevanceScore": 0.75,
+    "context": "Information provided about membership cancellation."
+  },
+  {
+    "id": "ac281def-813a-4907-8909-fc69bd04f8eb",
+    "analysisId": "a8f75252-6ae2-4bde-9f15-d801baf49035",
+    "keyphrase": "booking a session",
+    "frequency": 1,
+    "relevanceScore": 0.8,
+    "context": "User inquired about scheduling an appointment."
+  },
+  {
+    "id": "2ec31c62-8e57-4111-9cfb-cbc0ed8f7b7d",
+    "analysisId": "a8f75252-6ae2-4bde-9f15-d801baf49035",
+    "keyphrase": "gym hours",
+    "frequency": 1,
+    "relevanceScore": 0.7,
+    "context": "User asked about the operating hours of the gym."
+  },
+  {
+    "id": "2d947541-1b90-41a1-9425-e9ce0c92252e",
+    "analysisId": "a8f75252-6ae2-4bde-9f15-d801baf49035",
+    "keyphrase": "rules of the gym",
+    "frequency": 1,
+    "relevanceScore": 0.6,
+    "context": "User requested information on gym regulations."
+  },
+  {
+    "id": "4ab50619-df9d-4aba-9b42-0474723f7eea",
+    "analysisId": "a8f75252-6ae2-4bde-9f15-d801baf49035",
+    "keyphrase": "membership cancellation",
+    "frequency": 1,
+    "relevanceScore": 0.7,
+    "context": "User was informed about the process for canceling memberships."
+  },
+  {
+    "id": "2587ca89-a620-461e-b2fa-47aad943dd12",
+    "analysisId": "acd97421-a53a-4937-9b3c-03fb7befc509",
+    "keyphrase": "appointment slots",
+    "frequency": 1,
+    "relevanceScore": 0.8,
+    "context": "Booking process for sessions"
+  },
+  {
+    "id": "7d346f99-f755-4766-a347-faca5d3e8e91",
+    "analysisId": "acd97421-a53a-4937-9b3c-03fb7befc509",
+    "keyphrase": "gym hours",
+    "frequency": 1,
+    "relevanceScore": 0.7,
+    "context": "Information about gym operating times"
+  },
+  {
+    "id": "abd9a4a1-3ae4-4588-a259-3bb5f0688609",
+    "analysisId": "acd97421-a53a-4937-9b3c-03fb7befc509",
+    "keyphrase": "rules of the gym",
+    "frequency": 1,
+    "relevanceScore": 0.85,
+    "context": "Guidelines for gym conduct and safety"
+  },
+  {
+    "id": "db0605a5-c7dd-437a-a0c2-2451e578700b",
+    "analysisId": "acd97421-a53a-4937-9b3c-03fb7befc509",
+    "keyphrase": "cancel memberships online",
+    "frequency": 1,
+    "relevanceScore": 0.75,
+    "context": "Policy regarding membership cancellations"
+  }
+]

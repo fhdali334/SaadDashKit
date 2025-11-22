@@ -1,0 +1,21 @@
+{
+	"folders": [
+		{
+			"name": "SaaSDashKit",
+			"path": "../../.."
+		},
+		{
+			"name": "vf-usage-api-exporter",
+			"path": "../../../../vf-usage-api-exporter"
+		},
+		{
+			"name": "TranscriptView",
+			"path": "../../../../TranscriptView"
+		},
+		{
+			"name": "vf-knowledge-base-exporter",
+			"path": "../../../../vf-knowledge-base-exporter"
+		}
+	],
+	"settings": {}
+}

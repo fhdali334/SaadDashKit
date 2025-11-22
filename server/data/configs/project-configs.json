@@ -1,0 +1,30 @@
+[
+  {
+    "project_id": "66aeff0ea380c590e96e8e70",
+    "budget": 60,
+    "credits_used": 0,
+    "start_date": "2025-11-15T00:46:52.868Z",
+    "vf_api_key": "VF.DM.68e6a156911014714892eee8.Yeb3HK3luekO31gR",
+    "shopify_api_key": "eedc6b88bc2dd5933d855c13f77f03b4",
+    "shopify_api_secret": "a858b3a558aeeaa0cfe44e553ef513ad"
+  },
+  {
+    "project_id": "68e7dd949828a4d17e920f04",
+    "budget": 60,
+    "credits_used": 0,
+    "start_date": "2025-11-17T00:18:54.228Z",
+    "vf_api_key": "VF.DM.68ea747367b776b6fa20821a.lITgP3p0DKjLs4jH"
+  },
+  {
+    "project_id": "51bde0cd-d1f2-4652-b4d3-ac080e7e9ef0",
+    "budget": 60,
+    "credits_used": 0,
+    "start_date": "2025-11-17T20:25:06.346Z"
+  },
+  {
+    "project_id": "691b88ba74208a571821135a",
+    "budget": 60,
+    "credits_used": 0,
+    "start_date": "2025-11-17T23:04:44.846Z"
+  }
+]
