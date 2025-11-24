@@ -9,14 +9,17 @@ import { useState } from "react"
 import { useToast } from "@/hooks/use-toast"
 import { apiRequest, queryClient } from "@/lib/queryClient"
 import { SalesChart } from "@/components/sales-chart"
-import { StatisticsChart } from "@/components/statistics-chart"
+// import { StatisticsChart } from "@/components/statistics-chart"
 import { CircularProgress } from "@/components/circular-progress"
 import { CreditStatusCard } from "@/components/credit-status-card"
 import { QuickStatsCard } from "@/components/quick-stats-card"
-import { CustomersMap } from "@/components/customers-map"
+// import { CustomersMap } from "@/components/customers-map"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { MetricCardEnhanced } from "@/components/metric-card-enhanced" // Import MetricCardEnhanced
+import { WorldMapHero } from "@/components/world-map-hero"
+import { HexagonHeatmapChart } from "@/components/hexagon-heatmap-chart"
+import { SemicircleAnalyticsChart } from "@/components/semicircle-analytics-chart"
 
 interface BudgetStatus {
   status: string
@@ -112,8 +115,8 @@ export default function Dashboard() {
 
   // Calculate success rate from history
   const history = stats?.usageHistory || []
-  const totalRequestsSum = history.reduce((acc:any, curr:any) => acc + curr.totalRequests, 0)
-  const successRequestsSum = history.reduce((acc:any, curr:any) => acc + curr.successfulRequests, 0)
+  const totalRequestsSum = history.reduce((acc: any, curr: any) => acc + curr.totalRequests, 0)
+  const successRequestsSum = history.reduce((acc: any, curr: any) => acc + curr.successfulRequests, 0)
   const successRate = totalRequestsSum > 0 ? (successRequestsSum / totalRequestsSum) * 100 : 99.3
 
   return (
@@ -122,6 +125,10 @@ export default function Dashboard() {
         <h2 className="text-3xl font-bold tracking-tight" data-testid="text-dashboard-title">
           Dashboard
         </h2>
+      </div>
+
+      <div className="w-full">
+        <WorldMapHero />
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -161,22 +168,27 @@ export default function Dashboard() {
           budget={budget}
           spent={spent}
           creditsUsed={creditsUsed}
-          totalCredits={10000} // Assuming 10k is the limit for $60
+          totalCredits={10000}
           resetDate={budgetStatus?.reset_date || null}
         />
-        <QuickStatsCard
-          successRate={successRate}
-          avgMessagesPerSession={362.7} // Using static/mock value as per requirement since not in API
-          storageUsed={files}
-        />
+        <QuickStatsCard successRate={successRate} avgMessagesPerSession={362.7} storageUsed={files} />
       </div>
 
+      <div className="grid gap-4 md:grid-cols-2">
+        <div>
+          <HexagonHeatmapChart data={stats?.usageHistory || []} />
+        </div>
+        <div>
+          <SemicircleAnalyticsChart successRate={successRate} />
+        </div>
+      </div>
+
+      {/* Additional charts in responsive grid */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-        <div className="col-span-4">
+        <div className="col-span-1 md:col-span-1 lg:col-span-4">
           <SalesChart data={stats?.usageHistory || []} />
         </div>
-        <div className="col-span-3">
-          {/* Kept Circular Progress as alternative view or removed if redundant. Keeping as 'Monthly Target' variant */}
+        <div className="col-span-1 md:col-span-1 lg:col-span-3">
           <CircularProgress
             value={spent}
             max={budget}
@@ -188,15 +200,15 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <div className="grid gap-4 grid-cols-1">
+      {/* <div className="grid gap-4 grid-cols-1">
         <StatisticsChart data={stats?.usageHistory || []} />
-      </div>
+      </div> */}
 
-      <div className="grid gap-4 grid-cols-1">
+      {/* <div className="grid gap-4 grid-cols-1">
         <div className="col-span-1">
           <CustomersMap />
         </div>
-      </div>
+      </div> */}
 
       {/* Legacy Manual Credit Adjustment - Kept for functionality but styled simply */}
       {budgetStatus && (
