@@ -28,18 +28,24 @@ export function MetricCardEnhanced({
   const isPositive = percentageChange !== undefined && percentageChange >= 0
 
   return (
-    <Card className="border-card-border hover:shadow-md transition-shadow">
+    <Card className="border-card-border hover:shadow-md transition-shadow h-full">
       <CardContent className="p-6">
         <div className="flex items-start justify-between gap-4">
-          <div className="flex-1">
-            <p className="text-sm text-muted-foreground mb-2">{title}</p>
-            <div className="flex items-baseline gap-2">
-              <p className="text-3xl font-bold text-foreground">{value}</p>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm text-muted-foreground mb-2 truncate" title={title}>
+              {title}
+            </p>
+            <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
+              <p className="text-2xl md:text-3xl font-bold text-foreground break-all">{value}</p>
               {percentageChange !== undefined && (
                 <div
                   className={`flex items-center gap-1 text-sm font-medium ${isPositive ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}
                 >
-                  {isPositive ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
+                  {isPositive ? (
+                    <TrendingUp className="w-4 h-4 flex-shrink-0" />
+                  ) : (
+                    <TrendingDown className="w-4 h-4 flex-shrink-0" />
+                  )}
                   <span>
                     {isPositive ? "+" : ""}
                     {percentageChange.toFixed(2)}%

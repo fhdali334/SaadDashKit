@@ -15,8 +15,8 @@ export function CustomersMap() {
     <Card className="h-full border-card-border shadow-sm flex flex-col">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-7">
         <div>
-          <CardTitle className="text-lg font-semibold">Customers Demographic</CardTitle>
-          <p className="text-sm text-muted-foreground mt-1">Number of customer based on country</p>
+          <CardTitle className="text-lg font-semibold">Requests Demographic</CardTitle>
+          <p className="text-sm text-muted-foreground mt-1">Number of requests based on country</p>
         </div>
         <Button variant="ghost" size="icon" className="h-8 w-8">
           <MoreVertical className="h-4 w-4" />
@@ -76,7 +76,7 @@ export function CustomersMap() {
               </div>
               <div className="flex flex-col">
                 <span className="text-sm font-semibold">USA</span>
-                <span className="text-xs text-muted-foreground">2,379 Customers</span>
+                <span className="text-xs text-muted-foreground">2,379 Requests</span>
               </div>
             </div>
             <div className="flex items-center gap-3 flex-1 justify-end max-w-[200px]">
@@ -98,14 +98,14 @@ export function CustomersMap() {
               </div>
               <div className="flex flex-col">
                 <span className="text-sm font-semibold">France</span>
-                <span className="text-xs text-muted-foreground">589 Customers</span>
+                <span className="text-xs text-muted-foreground">589 Requests</span>
               </div>
             </div>
             <div className="flex items-center gap-3 flex-1 justify-end max-w-[200px]">
               <div className="h-2 flex-1 bg-muted rounded-full overflow-hidden">
                 <div className="h-full bg-blue-500 w-[23%] rounded-full" />
               </div>
-              <span className="text-sm font-medium text-blue-500">23%</span>
+              <span className="text-sm font-medium text-blue-500">21%</span>
             </div>
           </div>
         </div>
