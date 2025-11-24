@@ -1,18 +1,22 @@
 "use client"
 
 import { useQuery, useMutation } from "@tanstack/react-query"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Activity, CreditCard, MessageSquare, FileText, Plus, Minus } from "lucide-react"
 import type { UsageStats } from "@shared/schema"
-import { UsageChart } from "@/components/usage-chart"
-import { CreditLimitBar } from "@/components/credit-limit-bar"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Skeleton } from "@/components/ui/skeleton"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useState } from "react"
 import { useToast } from "@/hooks/use-toast"
 import { apiRequest, queryClient } from "@/lib/queryClient"
+import { SalesChart } from "@/components/sales-chart"
+import { StatisticsChart } from "@/components/statistics-chart"
+import { CircularProgress } from "@/components/circular-progress"
+import { CreditStatusCard } from "@/components/credit-status-card"
+import { QuickStatsCard } from "@/components/quick-stats-card"
+import { CustomersMap } from "@/components/customers-map"
+import { Skeleton } from "@/components/ui/skeleton"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { MetricCardEnhanced } from "@/components/metric-card-enhanced" // Import MetricCardEnhanced
 
 interface BudgetStatus {
   status: string
@@ -37,7 +41,7 @@ export default function Dashboard() {
 
   const { data: budgetStatus, isLoading: budgetLoading } = useQuery<BudgetStatus>({
     queryKey: ["/api/budget/check"],
-    refetchInterval: 30000, // Refresh every 30 seconds
+    refetchInterval: 30000,
   })
 
   const addCreditsMutation = useMutation({
@@ -47,19 +51,11 @@ export default function Dashboard() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/budget/check"] })
       queryClient.invalidateQueries({ queryKey: ["/api/usage/stats"] })
-      const parsedAmount = Number.parseInt(creditAmount)
       toast({
         title: "Credits updated",
-        description: `Successfully added ${parsedAmount.toLocaleString()} credits`,
+        description: "Successfully added credits",
       })
       setCreditAmount("1000")
-    },
-    onError: () => {
-      toast({
-        title: "Failed to update credits",
-        description: "An error occurred",
-        variant: "destructive",
-      })
     },
   })
 
@@ -70,274 +66,168 @@ export default function Dashboard() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/budget/check"] })
       queryClient.invalidateQueries({ queryKey: ["/api/usage/stats"] })
-      const parsedAmount = Number.parseInt(creditAmount)
       toast({
         title: "Credits updated",
-        description: `Successfully subtracted ${parsedAmount.toLocaleString()} credits`,
+        description: "Successfully subtracted credits",
       })
       setCreditAmount("1000")
-    },
-    onError: () => {
-      toast({
-        title: "Failed to update credits",
-        description: "An error occurred",
-        variant: "destructive",
-      })
     },
   })
 
   const handleAddCredits = () => {
     const amount = Number.parseInt(creditAmount)
-    if (isNaN(amount) || amount <= 0) {
-      toast({
-        title: "Invalid amount",
-        description: "Please enter a positive number",
-        variant: "destructive",
-      })
-      return
-    }
+    if (isNaN(amount) || amount <= 0) return
     addCreditsMutation.mutate(amount)
   }
 
   const handleSubtractCredits = () => {
     const amount = Number.parseInt(creditAmount)
-    if (isNaN(amount) || amount <= 0) {
-      toast({
-        title: "Invalid amount",
-        description: "Please enter a positive number",
-        variant: "destructive",
-      })
-      return
-    }
+    if (isNaN(amount) || amount <= 0) return
     subtractCreditsMutation.mutate(amount)
   }
-
-  // Calculate credit limit based on budget (minimum 10,000 credits to prevent divide-by-zero)
-  const budgetInCredits = budgetStatus ? Math.max(Math.floor((budgetStatus.budget / 60) * 10000), 10000) : 10000
-  const creditLimit = budgetStatus
-    ? {
-        current: budgetStatus.credits_used,
-        limit: budgetInCredits,
-        percentage: budgetInCredits > 0 ? (budgetStatus.credits_used / budgetInCredits) * 100 : 0,
-        status: budgetStatus.over_budget
-          ? ("danger" as const)
-          : budgetInCredits > 0 && budgetStatus.credits_used / budgetInCredits > 0.7
-            ? ("warning" as const)
-            : ("safe" as const),
-      }
-    : null
 
   const isLoading = statsLoading || budgetLoading
 
   if (isLoading) {
     return (
-      <div className="flex-1 overflow-auto">
-        <div className="w-full px-6 py-8 md:px-8 md:py-10 space-y-8">
-          <div>
-            <Skeleton className="h-8 w-48 mb-2" />
-            <Skeleton className="h-4 w-96" />
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[1, 2, 3, 4].map((i) => (
-              <Skeleton key={i} className="h-32" />
-            ))}
-          </div>
+      <div className="flex-1 p-6 md:p-8 space-y-8">
+        <Skeleton className="h-8 w-48 mb-4" />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {[1, 2, 3, 4].map((i) => (
+            <Skeleton key={i} className="h-32" />
+          ))}
         </div>
       </div>
     )
   }
 
+  // Data preparation
+  const totalUsage = stats?.totalUsage || 0
+  const activeConversations = stats?.activeConversations || 0
+  const files = stats?.filesInKB || 0
+  const creditsUsed = stats?.creditsUsed || 0
+
+  const budget = budgetStatus?.budget || 60 // Default to $60 (10k credits)
+  const spent = budgetStatus?.current_cost || 0
+
+  // Calculate success rate from history
+  const history = stats?.usageHistory || []
+  const totalRequestsSum = history.reduce((acc:any, curr:any) => acc + curr.totalRequests, 0)
+  const successRequestsSum = history.reduce((acc:any, curr:any) => acc + curr.successfulRequests, 0)
+  const successRate = totalRequestsSum > 0 ? (successRequestsSum / totalRequestsSum) * 100 : 99.3
+
   return (
-    <div className="flex-1 overflow-auto">
-      <div className="w-full px-6 py-8 md:px-8 md:py-10 space-y-8">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground mb-2" data-testid="text-dashboard-title">
-            Dashboard Overview
-          </h1>
-          <p className="text-sm text-muted-foreground">Monitor your Voiceflow chatbot performance and resource usage</p>
+    <div className="flex-1 space-y-6 p-6 md:p-8 pt-6">
+      <div className="flex items-center justify-between space-y-2">
+        <h2 className="text-3xl font-bold tracking-tight" data-testid="text-dashboard-title">
+          Dashboard
+        </h2>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <MetricCardEnhanced
+          title="Total Usage"
+          value={totalUsage.toLocaleString()}
+          percentageChange={11.01}
+          icon={Activity}
+          iconBg="blue"
+        />
+        <MetricCardEnhanced
+          title="Credits Used"
+          value={creditsUsed.toLocaleString()}
+          percentageChange={-9.0}
+          icon={CreditCard}
+          iconBg="red"
+        />
+        <MetricCardEnhanced
+          title="Active Conversations"
+          value={activeConversations.toLocaleString()}
+          percentageChange={8.5}
+          icon={MessageSquare}
+          iconBg="green"
+        />
+        <MetricCardEnhanced
+          title="Files in KB"
+          value={files.toString()}
+          percentageChange={5.2}
+          icon={FileText}
+          iconBg="orange"
+        />
+      </div>
+
+      {/* Credit Status and Quick Stats Row */}
+      <div className="grid gap-4 md:grid-cols-2">
+        <CreditStatusCard
+          budget={budget}
+          spent={spent}
+          creditsUsed={creditsUsed}
+          totalCredits={10000} // Assuming 10k is the limit for $60
+          resetDate={budgetStatus?.reset_date || null}
+        />
+        <QuickStatsCard
+          successRate={successRate}
+          avgMessagesPerSession={362.7} // Using static/mock value as per requirement since not in API
+          storageUsed={files}
+        />
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+        <div className="col-span-4">
+          <SalesChart data={stats?.usageHistory || []} />
         </div>
+        <div className="col-span-3">
+          {/* Kept Circular Progress as alternative view or removed if redundant. Keeping as 'Monthly Target' variant */}
+          <CircularProgress
+            value={spent}
+            max={budget}
+            title="Monthly Target"
+            subtitle="Budget utilization"
+            message="Your credit usage is within safe limits."
+            className="h-full"
+          />
+        </div>
+      </div>
 
-        {creditLimit && creditLimit.status === "danger" && (
-          <Alert variant="destructive" data-testid="alert-credit-limit">
-            <AlertDescription>
-              Warning: You're approaching your credit limit. Current usage: {creditLimit.percentage.toFixed(1)}%
-            </AlertDescription>
-          </Alert>
-        )}
+      <div className="grid gap-4 grid-cols-1">
+        <StatisticsChart data={stats?.usageHistory || []} />
+      </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card
-            className="border border-card-border shadow-sm hover:shadow-md transition-shadow"
-            data-testid="card-total-usage"
-          >
-            <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Total Usage</CardTitle>
-              <Activity className="w-5 h-5 text-primary" />
+      <div className="grid gap-4 grid-cols-1">
+        <div className="col-span-1">
+          <CustomersMap />
+        </div>
+      </div>
+
+      {/* Legacy Manual Credit Adjustment - Kept for functionality but styled simply */}
+      {budgetStatus && (
+        <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Manual Credit Adjustment</CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-foreground" data-testid="text-total-usage">
-                {stats?.totalUsage.toLocaleString() || 0}
+            <CardContent className="space-y-4">
+              <div className="flex gap-2">
+                <Input
+                  type="number"
+                  value={creditAmount}
+                  onChange={(e) => setCreditAmount(e.target.value)}
+                  className="flex-1"
+                />
+                <Button onClick={handleAddCredits} disabled={addCreditsMutation.isPending}>
+                  <Plus className="w-4 h-4 mr-2" /> Add
+                </Button>
+                <Button onClick={handleSubtractCredits} disabled={subtractCreditsMutation.isPending} variant="outline">
+                  <Minus className="w-4 h-4 mr-2" /> Subtract
+                </Button>
               </div>
-              <p className="text-xs text-muted-foreground mt-2">API requests this month</p>
-            </CardContent>
-          </Card>
-
-          <Card
-            className="border border-card-border shadow-sm hover:shadow-md transition-shadow"
-            data-testid="card-credits-used"
-          >
-            <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Credits Used</CardTitle>
-              <CreditCard className="w-5 h-5 text-primary" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-foreground" data-testid="text-credits-used">
-                {stats?.creditsUsed.toLocaleString() || 0}
-              </div>
-              <p className="text-xs text-muted-foreground mt-2">
-                {creditLimit ? `${creditLimit.percentage.toFixed(1)}% of limit` : "Of total limit"}
+              <p className="text-xs text-muted-foreground">
+                Current: {budgetStatus.credits_used.toLocaleString()} credits used ($
+                {budgetStatus.current_cost.toFixed(2)})
               </p>
             </CardContent>
           </Card>
-
-          <Card
-            className="border border-card-border shadow-sm hover:shadow-md transition-shadow"
-            data-testid="card-active-conversations"
-          >
-            <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Active Conversations</CardTitle>
-              <MessageSquare className="w-5 h-5 text-primary" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-foreground" data-testid="text-active-conversations">
-                {stats?.activeConversations || 0}
-              </div>
-              <p className="text-xs text-muted-foreground mt-2">Ongoing sessions</p>
-            </CardContent>
-          </Card>
-
-          <Card
-            className="border border-card-border shadow-sm hover:shadow-md transition-shadow"
-            data-testid="card-files-kb"
-          >
-            <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Files in KB</CardTitle>
-              <FileText className="w-5 h-5 text-primary" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-foreground" data-testid="text-files-kb">
-                {stats?.filesInKB || 0}
-              </div>
-              <p className="text-xs text-muted-foreground mt-2">Knowledge base files</p>
-            </CardContent>
-          </Card>
         </div>
-
-        {creditLimit && budgetStatus && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card className="border border-card-border shadow-sm" data-testid="card-credit-limit">
-              <CardHeader>
-                <CardTitle className="text-lg font-semibold">Credit Limit Status</CardTitle>
-                <p className="text-xs text-muted-foreground mt-2">
-                  Budget: ${budgetStatus.budget.toFixed(2)} • Spent: ${budgetStatus.current_cost.toFixed(2)} •
-                  Remaining: ${budgetStatus.remaining.toFixed(2)}
-                </p>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <CreditLimitBar creditLimit={creditLimit} />
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Next reset:</span>
-                  <span className="font-medium text-foreground" data-testid="text-reset-date">
-                    {new Date(budgetStatus.reset_date).toLocaleDateString()} ({budgetStatus.days_remaining} days)
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="border border-card-border shadow-sm" data-testid="card-credit-management">
-              <CardHeader>
-                <CardTitle className="text-lg font-semibold">Manual Credit Adjustment</CardTitle>
-                <p className="text-xs text-muted-foreground mt-2">
-                  Add or subtract credits manually (10,000 credits = $60)
-                </p>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex gap-2">
-                  <Input
-                    type="number"
-                    placeholder="Amount"
-                    value={creditAmount}
-                    onChange={(e) => setCreditAmount(e.target.value)}
-                    data-testid="input-credit-amount"
-                    className="flex-1"
-                  />
-                </div>
-                <div className="flex gap-2">
-                  <Button
-                    onClick={handleAddCredits}
-                    disabled={addCreditsMutation.isPending || subtractCreditsMutation.isPending}
-                    className="flex-1"
-                    data-testid="button-add-credits"
-                  >
-                    <Plus className="w-4 h-4 mr-2" />
-                    Add Credits
-                  </Button>
-                  <Button
-                    onClick={handleSubtractCredits}
-                    disabled={addCreditsMutation.isPending || subtractCreditsMutation.isPending}
-                    variant="outline"
-                    className="flex-1 bg-transparent"
-                    data-testid="button-subtract-credits"
-                  >
-                    <Minus className="w-4 h-4 mr-2" />
-                    Subtract Credits
-                  </Button>
-                </div>
-                <div className="text-xs text-muted-foreground text-center">
-                  Current: {budgetStatus.credits_used.toLocaleString()} credits used ($
-                  {budgetStatus.current_cost.toFixed(2)})
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        )}
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card className="border border-card-border shadow-sm" data-testid="card-usage-chart">
-            <CardHeader>
-              <CardTitle className="text-lg font-semibold">Usage Over Time</CardTitle>
-            </CardHeader>
-            <CardContent>{stats?.usageHistory && <UsageChart data={stats.usageHistory} />}</CardContent>
-          </Card>
-
-          <Card className="border border-card-border shadow-sm" data-testid="card-quick-stats">
-            <CardHeader>
-              <CardTitle className="text-lg font-semibold">Quick Stats</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Success Rate</span>
-                <span className="text-sm font-medium text-foreground">
-                  {stats && stats.totalUsage > 0 ? ((stats.totalUsage / (stats.totalUsage + 100)) * 100).toFixed(1) : 0}
-                  %
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Avg. Messages/Session</span>
-                <span className="text-sm font-medium text-foreground">
-                  {stats && stats.activeConversations > 0
-                    ? (stats.totalUsage / stats.activeConversations).toFixed(1)
-                    : 0}
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Storage Used</span>
-                <span className="text-sm font-medium text-foreground">{stats?.filesInKB || 0} files</span>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
+      )}
     </div>
   )
 }

@@ -1,59 +1,61 @@
-"use client"
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts"
-import { BarChart3 } from "lucide-react"
+import { BarChart3, MoreHorizontal } from "lucide-react"
+import type { UsageData } from "@shared/schema"
+import { Button } from "@/components/ui/button"
 
-const monthlySalesData = [
-  { month: "Jan", sales: 400 },
-  { month: "Feb", sales: 300 },
-  { month: "Mar", sales: 450 },
-  { month: "Apr", sales: 380 },
-  { month: "May", sales: 520 },
-  { month: "Jun", sales: 410 },
-  { month: "Jul", sales: 480 },
-  { month: "Aug", sales: 390 },
-  { month: "Sep", sales: 500 },
-  { month: "Oct", sales: 440 },
-  { month: "Nov", sales: 610 },
-  { month: "Dec", sales: 520 },
-]
+interface SalesChartProps {
+  data: UsageData[]
+}
+    
+export function SalesChart({ data }: SalesChartProps) {
+  // Use last 12 days or data points to mimic the "Monthly" look but with daily data
+  const chartData = data.slice(-12).map((d) => ({
+    name: new Date(d.date).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+    value: d.totalRequests,
+    fullDate: d.date,
+  }))
 
-export function SalesChart() {
   return (
-    <Card className="border-card-border">
+    <Card className="border-card-border h-full">
       <CardHeader className="pb-4">
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg font-semibold flex items-center gap-2">
             <BarChart3 className="w-5 h-5 text-primary" />
-            Monthly Sales
+            Daily Activity
           </CardTitle>
-          <button className="p-1.5 hover:bg-muted rounded-md transition-colors">
-            <svg className="w-5 h-5 text-muted-foreground" fill="currentColor" viewBox="0 0 24 24">
-              <circle cx="12" cy="5" r="2" />
-              <circle cx="12" cy="12" r="2" />
-              <circle cx="12" cy="19" r="2" />
-            </svg>
-          </button>
+          <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground">
+            <MoreHorizontal className="h-4 w-4" />
+          </Button>
         </div>
       </CardHeader>
       <CardContent>
-        <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={monthlySalesData}>
-            <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
-            <XAxis dataKey="month" stroke="var(--color-muted-foreground)" />
-            <YAxis stroke="var(--color-muted-foreground)" />
-            <Tooltip
-              contentStyle={{
-                backgroundColor: "var(--color-card)",
-                border: "1px solid var(--color-border)",
-                borderRadius: "8px",
-                color: "var(--color-foreground)",
-              }}
-            />
-            <Bar dataKey="sales" fill="var(--color-primary)" radius={[8, 8, 0, 0]} />
-          </BarChart>
-        </ResponsiveContainer>
+        <div className="h-[300px] w-full">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
+              <XAxis
+                dataKey="name"
+                axisLine={false}
+                tickLine={false}
+                tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }}
+                dy={10}
+              />
+              <YAxis axisLine={false} tickLine={false} tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }} />
+              <Tooltip
+                cursor={{ fill: "hsl(var(--muted)/0.3)" }}
+                contentStyle={{
+                  backgroundColor: "hsl(var(--popover))",
+                  border: "1px solid hsl(var(--border))",
+                  borderRadius: "8px",
+                  color: "hsl(var(--popover-foreground))",
+                }}
+                labelStyle={{ color: "hsl(var(--muted-foreground))" }}
+              />
+              <Bar dataKey="value" name="Requests" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} maxBarSize={50} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
       </CardContent>
     </Card>
   )

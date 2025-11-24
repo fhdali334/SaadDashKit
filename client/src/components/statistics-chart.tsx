@@ -1,94 +1,102 @@
-"use client"
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts"
 import { TrendingUp } from "lucide-react"
+import type { UsageData } from "@shared/schema"
+import { Button } from "@/components/ui/button"
 
-const statisticsData = [
-  { month: "Jan", series1: 40, series2: 24, series3: 10 },
-  { month: "Feb", series1: 45, series2: 30, series3: 15 },
-  { month: "Mar", series1: 35, series2: 28, series3: 12 },
-  { month: "Apr", series1: 50, series2: 32, series3: 18 },
-  { month: "May", series1: 55, series2: 38, series3: 22 },
-  { month: "Jun", series1: 50, series2: 35, series3: 20 },
-  { month: "Jul", series1: 60, series2: 42, series3: 25 },
-  { month: "Aug", series1: 58, series2: 40, series3: 23 },
-  { month: "Sep", series1: 65, series2: 45, series3: 28 },
-  { month: "Oct", series1: 70, series2: 48, series3: 30 },
-  { month: "Nov", series1: 75, series2: 52, series3: 32 },
-  { month: "Dec", series1: 80, series2: 55, series3: 35 },
-]
+interface StatisticsChartProps {
+  data: UsageData[]
+}
 
-export function StatisticsChart() {
+export function StatisticsChart({ data }: StatisticsChartProps) {
+  const chartData =
+    data.length > 0
+      ? data.map((d) => ({
+          name: new Date(d.date).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+          total: d.totalRequests,
+          success: d.successfulRequests,
+          failed: d.failedRequests,
+          fullDate: d.date,
+        }))
+      : []
+
   return (
-    <Card className="border-card-border">
+    <Card className="border-card-border col-span-full">
       <CardHeader className="pb-4">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between flex-wrap gap-4">
           <div>
             <CardTitle className="text-lg font-semibold flex items-center gap-2">
               <TrendingUp className="w-5 h-5 text-primary" />
-              Statistics
+              Usage Statistics
             </CardTitle>
-            <p className="text-sm text-muted-foreground mt-1">Target you've set for each month</p>
+            <p className="text-sm text-muted-foreground mt-1">API requests over time</p>
           </div>
           <div className="flex gap-2">
-            <button className="px-3 py-1 text-xs font-medium text-muted-foreground hover:bg-muted rounded-md transition-colors">
+            <Button variant="outline" size="sm" className="h-8 text-xs bg-transparent">
               Overview
-            </button>
-            <button className="px-3 py-1 text-xs font-medium text-muted-foreground hover:bg-muted rounded-md transition-colors">
-              Sales
-            </button>
-            <button className="px-3 py-1 text-xs font-medium text-muted-foreground hover:bg-muted rounded-md transition-colors">
-              Revenue
-            </button>
+            </Button>
+            <Button variant="ghost" size="sm" className="h-8 text-xs">
+              Requests
+            </Button>
+            <Button variant="ghost" size="sm" className="h-8 text-xs">
+              Errors
+            </Button>
           </div>
         </div>
       </CardHeader>
       <CardContent>
-        <ResponsiveContainer width="100%" height={300}>
-          <AreaChart data={statisticsData}>
-            <defs>
-              <linearGradient id="color1" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="var(--color-primary)" stopOpacity={0.3} />
-                <stop offset="95%" stopColor="var(--color-primary)" stopOpacity={0} />
-              </linearGradient>
-              <linearGradient id="color2" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="var(--color-primary)" stopOpacity={0.15} />
-                <stop offset="95%" stopColor="var(--color-primary)" stopOpacity={0} />
-              </linearGradient>
-              <linearGradient id="color3" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="var(--color-primary)" stopOpacity={0.08} />
-                <stop offset="95%" stopColor="var(--color-primary)" stopOpacity={0} />
-              </linearGradient>
-            </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
-            <XAxis dataKey="month" stroke="var(--color-muted-foreground)" />
-            <YAxis stroke="var(--color-muted-foreground)" />
-            <Tooltip
-              contentStyle={{
-                backgroundColor: "var(--color-card)",
-                border: "1px solid var(--color-border)",
-                borderRadius: "8px",
-                color: "var(--color-foreground)",
-              }}
-            />
-            <Area type="monotone" dataKey="series1" stroke="var(--color-primary)" fill="url(#color1)" />
-            <Area
-              type="monotone"
-              dataKey="series2"
-              stroke="var(--color-primary)"
-              fill="url(#color2)"
-              strokeOpacity={0.7}
-            />
-            <Area
-              type="monotone"
-              dataKey="series3"
-              stroke="var(--color-primary)"
-              fill="url(#color3)"
-              strokeOpacity={0.4}
-            />
-          </AreaChart>
-        </ResponsiveContainer>
+        <div className="h-[350px] w-full">
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+              <defs>
+                <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                </linearGradient>
+                <linearGradient id="colorSuccess" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#22c55e" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="#22c55e" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
+              <XAxis
+                dataKey="name"
+                axisLine={false}
+                tickLine={false}
+                tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }}
+                dy={10}
+              />
+              <YAxis axisLine={false} tickLine={false} tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }} />
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: "hsl(var(--popover))",
+                  border: "1px solid hsl(var(--border))",
+                  borderRadius: "var(--radius)",
+                }}
+                itemStyle={{ color: "hsl(var(--popover-foreground))" }}
+                labelStyle={{ color: "hsl(var(--muted-foreground))" }}
+              />
+              <Area
+                type="monotone"
+                dataKey="total"
+                stroke="hsl(var(--primary))"
+                strokeWidth={2}
+                fillOpacity={1}
+                fill="url(#colorTotal)"
+                name="Total Requests"
+              />
+              <Area
+                type="monotone"
+                dataKey="success"
+                stroke="#22c55e"
+                strokeWidth={2}
+                fillOpacity={1}
+                fill="url(#colorSuccess)"
+                name="Successful"
+              />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
       </CardContent>
     </Card>
   )
