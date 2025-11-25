@@ -8,14 +8,11 @@ interface MetricCardEnhancedProps {
   value: string | number
   percentageChange?: number
   icon: LucideIcon
-  iconBg?: "blue" | "green" | "orange" | "red"
+  iconBg?: "blue"
 }
 
 const iconBgColors = {
   blue: "bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400",
-  green: "bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400",
-  orange: "bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400",
-  red: "bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400",
 }
 
 export function MetricCardEnhanced({
@@ -39,7 +36,7 @@ export function MetricCardEnhanced({
               <p className="text-2xl md:text-3xl font-bold text-foreground break-all">{value}</p>
               {percentageChange !== undefined && (
                 <div
-                  className={`flex items-center gap-1 text-sm font-medium ${isPositive ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}
+                  className={`flex items-center gap-1 text-sm font-medium ${isPositive ? "text-blue-600 dark:text-blue-400" : "text-blue-600 dark:text-blue-400"}`}
                 >
                   {isPositive ? (
                     <TrendingUp className="w-4 h-4 flex-shrink-0" />

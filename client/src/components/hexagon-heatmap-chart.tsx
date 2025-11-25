@@ -46,7 +46,7 @@ export function HexagonHeatmapChart({ data }: HexagonHeatmapChartProps) {
       </CardHeader>
       <CardContent>
         <div className="h-[210px] w-full">
-          {/* <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer width="100%" height="100%">
             <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.2} />
               <XAxis
@@ -82,7 +82,7 @@ export function HexagonHeatmapChart({ data }: HexagonHeatmapChartProps) {
                 ))}
               </Scatter>
             </ScatterChart>
-          </ResponsiveContainer> */}
+          </ResponsiveContainer>
         </div>
         <div className="mt-4 flex gap-4 flex-wrap justify-center items-center">
           <div className="flex items-center gap-2">

@@ -144,21 +144,21 @@ export default function Dashboard() {
           value={creditsUsed.toLocaleString()}
           percentageChange={-9.0}
           icon={CreditCard}
-          iconBg="red"
+          iconBg="blue"
         />
         <MetricCardEnhanced
           title="Active Conversations"
           value={activeConversations.toLocaleString()}
           percentageChange={8.5}
           icon={MessageSquare}
-          iconBg="green"
+          iconBg="blue"
         />
         <MetricCardEnhanced
           title="Files in KB"
           value={files.toString()}
           percentageChange={5.2}
           icon={FileText}
-          iconBg="orange"
+          iconBg="blue"
         />
       </div>
 
@@ -203,8 +203,8 @@ export default function Dashboard() {
       {/* <div className="grid gap-4 grid-cols-1">
         <StatisticsChart data={stats?.usageHistory || []} />
       </div> */}
-
-      {/* <div className="grid gap-4 grid-cols-1">
+{/* 
+      <div className="grid gap-4 grid-cols-1">
         <div className="col-span-1">
           <CustomersMap />
         </div>

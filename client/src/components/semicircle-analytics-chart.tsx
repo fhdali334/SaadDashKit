@@ -10,16 +10,16 @@ interface SemicircleAnalyticsChartProps {
 export function SemicircleAnalyticsChart({ successRate = 94.2, data }: SemicircleAnalyticsChartProps) {
   const chartData = data || [
     { name: "Successful", value: successRate, fill: "#3b82f6" },
-    { name: "Failed", value: 100 - successRate, fill: "#ef4444" },
+    { name: "Failed", value: 100 - successRate, fill: "#bfdbfe" },
   ]
 
   return (
-    <Card className="border-border shadow-sm ">
+    <Card className="border-border shadow-sm h-full">
       <CardHeader className="pb-4">
         <div className="flex items-center justify-between">
           <div>
             <CardTitle className="text-lg font-semibold flex items-center gap-2">
-              <TrendingUp className="w-5 h-5 text-green-500" />
+              <TrendingUp className="w-5 h-5 text-blue-600 dark:text-blue-400" />
               Success Rate
             </CardTitle>
             <p className="text-xs text-muted-foreground mt-1">API reliability metrics</p>
@@ -56,19 +56,19 @@ export function SemicircleAnalyticsChart({ successRate = 94.2, data }: Semicircl
             </PieChart>
           </ResponsiveContainer>
           <div className="text-center -mt-12 relative z-10">
-            <div className="text-4xl font-bold text-green-500">{successRate.toFixed(1)}%</div>
+            <div className="text-4xl font-bold text-blue-600 dark:text-blue-400">{successRate.toFixed(1)}%</div>
             <div className="text-xs text-muted-foreground">Success Rate</div>
           </div>
         </div>
         <div className="mt-6 flex gap-6 justify-center">
           <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-green-500" />
+            <div className="w-2 h-2 rounded-full bg-blue-600 dark:bg-blue-400" />
             <span className="text-sm font-medium text-foreground">
               Successful <span className="text-muted-foreground">{successRate.toFixed(1)}%</span>
             </span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-red-500" />
+            <div className="w-2 h-2 rounded-full bg-blue-200 dark:bg-blue-700" />
             <span className="text-sm font-medium text-foreground">
               Failed <span className="text-muted-foreground">{(100 - successRate).toFixed(1)}%</span>
             </span>
