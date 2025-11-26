@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { BarChart3, RefreshCw, TrendingUp, ArrowUpRight } from "lucide-react"
+import { BarChart3, RefreshCw, TrendingUp, ArrowUpRight, ArrowDownRight } from "lucide-react"
 import { Skeleton } from "@/components/ui/skeleton"
 import { MOCK_USAGE_DATA } from "@/lib/mock-usage-data"
 import {
@@ -24,6 +24,9 @@ import { Line } from "react-chartjs-2"
 import "chartjs-adapter-luxon"
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler, TimeScale)
+
+const TAILADMIN_BLUE = "#465FFF"
+const TAILADMIN_BLUE_LIGHT = "rgba(70, 95, 255, 0.12)"
 
 export function UsageAnalyticsSection() {
   const [metric, setMetric] = useState("credit_usage")
@@ -58,9 +61,7 @@ export function UsageAnalyticsSection() {
 
       const items = json.items || []
 
-      // Use mock data if API returns empty
       if (items.length === 0) {
-        console.log("[v0] No API data received, using mock data")
         setUsesMockData(true)
         setUsageItems(MOCK_USAGE_DATA)
         prepareChartData(MOCK_USAGE_DATA)
@@ -69,7 +70,6 @@ export function UsageAnalyticsSection() {
         prepareChartData(items)
       }
     } catch (e: any) {
-      console.log("[v0] API error, falling back to mock data:", e.message)
       setError(e.message || String(e))
       setUsesMockData(true)
       setUsageItems(MOCK_USAGE_DATA)
@@ -89,16 +89,19 @@ export function UsageAnalyticsSection() {
         {
           label: `${metric === "credit_usage" ? "Credit Usage" : metric === "interactions" ? "Interactions" : "Unique Users"}`,
           data,
-          borderColor: "#3b82f6",
-          backgroundColor: "rgba(59, 130, 246, 0.15)",
+          borderColor: TAILADMIN_BLUE,
+          backgroundColor: TAILADMIN_BLUE_LIGHT,
           fill: true,
-          tension: 0.25,
+          tension: 0.4,
           borderWidth: 2,
-          pointRadius: 4,
-          pointBackgroundColor: "#3b82f6",
+          pointRadius: 0,
+          pointHoverRadius: 5,
+          pointBackgroundColor: TAILADMIN_BLUE,
           pointBorderColor: "#fff",
           pointBorderWidth: 2,
-          pointHoverRadius: 6,
+          pointHoverBackgroundColor: TAILADMIN_BLUE,
+          pointHoverBorderColor: "#fff",
+          pointHoverBorderWidth: 2,
         },
       ],
     })
@@ -117,27 +120,52 @@ export function UsageAnalyticsSection() {
     },
     plugins: {
       legend: {
-        display: true,
-        position: "top" as const,
+        display: false,
       },
       tooltip: {
-        backgroundColor: "rgba(0, 0, 0, 0.8)",
+        backgroundColor: "#1e293b",
+        titleColor: "#f8fafc",
+        bodyColor: "#f8fafc",
+        borderColor: "#334155",
+        borderWidth: 1,
         padding: 12,
-        titleFont: { size: 14 },
-        bodyFont: { size: 13 },
+        displayColors: false,
       },
     },
     scales: {
       x: {
         type: "category" as const,
         grid: {
+          display: true,
+          color: "rgba(148, 163, 184, 0.1)",
+          drawBorder: false,
+        },
+        ticks: {
+          color: "#94a3b8",
+          font: {
+            size: 12,
+          },
+        },
+        border: {
           display: false,
         },
       },
       y: {
         beginAtZero: true,
         grid: {
-          color: "rgba(0, 0, 0, 0.05)",
+          display: true,
+          color: "rgba(148, 163, 184, 0.1)",
+          drawBorder: false,
+        },
+        ticks: {
+          color: "#94a3b8",
+          font: {
+            size: 12,
+          },
+          padding: 10,
+        },
+        border: {
+          display: false,
         },
       },
     },
@@ -206,15 +234,15 @@ export function UsageAnalyticsSection() {
         </Alert>
       )}
 
-      <Card className="border-blue-200 dark:border-blue-800">
-        <CardHeader className="pb-4 bg-gradient-to-r from-blue-50 to-blue-25 dark:from-blue-950 dark:to-blue-900 border-b border-blue-200 dark:border-blue-800">
-          <CardTitle className="text-base font-semibold flex items-center justify-between text-blue-900 dark:text-blue-50">
+      <Card className="border-border">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base font-semibold flex items-center justify-between">
             <span className="flex items-center gap-2">
-              <BarChart3 className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+              <BarChart3 className="w-5 h-5" style={{ color: TAILADMIN_BLUE }} />
               {metric === "credit_usage" ? "Credit Usage" : metric === "interactions" ? "Interactions" : "Unique Users"}{" "}
               Over Time
             </span>
-            <span className="text-xs font-normal text-blue-700 dark:text-blue-300">Last 30 days</span>
+            <span className="text-xs font-normal text-muted-foreground">Last 30 days</span>
           </CardTitle>
         </CardHeader>
         <CardContent className="pt-6">
@@ -231,7 +259,7 @@ export function UsageAnalyticsSection() {
       </Card>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="border-blue-200 dark:border-blue-800">
+        <Card className="border-border">
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium text-muted-foreground">
               Total {metric === "credit_usage" ? "Credits" : metric === "interactions" ? "Interactions" : "Users"}
@@ -240,50 +268,61 @@ export function UsageAnalyticsSection() {
           <CardContent>
             <div className="flex items-end justify-between">
               <div>
-                <div className="text-3xl font-bold text-blue-600 dark:text-blue-400">{totalCount.toLocaleString()}</div>
+                <div className="text-3xl font-bold" style={{ color: TAILADMIN_BLUE }}>
+                  {totalCount.toLocaleString()}
+                </div>
                 <p className="text-xs text-muted-foreground mt-2">{usageItems.length} data points</p>
               </div>
               <div
-                className={`flex items-center gap-1 ${monthChange >= 0 ? "text-blue-600 dark:text-blue-400" : "text-red-600 dark:text-red-400"}`}
+                className={`flex items-center gap-1 ${
+                  monthChange >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400"
+                }`}
               >
-                <ArrowUpRight className="w-4 h-4" />
-                <span className="text-sm font-medium">{Math.abs(monthChange).toFixed(1)}%</span>
+                {monthChange >= 0 ? <ArrowUpRight className="w-4 h-4" /> : <ArrowDownRight className="w-4 h-4" />}
+                <span className="text-sm font-medium">
+                  {monthChange >= 0 ? "+" : ""}
+                  {monthChange.toFixed(1)}%
+                </span>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="border-blue-200 dark:border-blue-800">
+        <Card className="border-border">
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium text-muted-foreground">Average per Day</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-end justify-between">
               <div>
-                <div className="text-3xl font-bold text-blue-600 dark:text-blue-400">{avgCount.toLocaleString()}</div>
+                <div className="text-3xl font-bold" style={{ color: TAILADMIN_BLUE }}>
+                  {avgCount.toLocaleString()}
+                </div>
                 <p className="text-xs text-muted-foreground mt-2">Daily average</p>
               </div>
-              <div className="flex items-center gap-1 text-blue-600 dark:text-blue-400">
+              <div className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
                 <TrendingUp className="w-4 h-4" />
-                <span className="text-sm font-medium">8.2%</span>
+                <span className="text-sm font-medium">+8.2%</span>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="border-blue-200 dark:border-blue-800">
+        <Card className="border-border">
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium text-muted-foreground">Peak Usage</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-end justify-between">
               <div>
-                <div className="text-3xl font-bold text-blue-600 dark:text-blue-400">{peakCount.toLocaleString()}</div>
+                <div className="text-3xl font-bold" style={{ color: TAILADMIN_BLUE }}>
+                  {peakCount.toLocaleString()}
+                </div>
                 <p className="text-xs text-muted-foreground mt-2">Highest daily usage</p>
               </div>
-              <div className="flex items-center gap-1 text-blue-600 dark:text-blue-400">
+              <div className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
                 <ArrowUpRight className="w-4 h-4" />
-                <span className="text-sm font-medium">5.4%</span>
+                <span className="text-sm font-medium">+5.4%</span>
               </div>
             </div>
           </CardContent>

@@ -1,6 +1,8 @@
-import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { BarChart3 } from "lucide-react";
+"use client"
+
+import { useState, useEffect } from "react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { BarChart3 } from "lucide-react"
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -12,90 +14,85 @@ import {
   Legend,
   Filler,
   TimeScale,
-} from 'chart.js';
-import { Line } from 'react-chartjs-2';
-import 'chartjs-adapter-luxon';
+} from "chart.js"
+import { Line } from "react-chartjs-2"
+import "chartjs-adapter-luxon"
 
-// Register Chart.js components
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-  Filler,
-  TimeScale
-);
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler, TimeScale)
 
-// Get default date range (last 30 days)
+const TAILADMIN_BLUE = "#465FFF"
+const TAILADMIN_BLUE_LIGHT = "rgba(70, 95, 255, 0.12)"
+
 function getDefaultDateRange() {
-  const end = new Date();
-  const start = new Date();
-  start.setDate(start.getDate() - 30);
-  
+  const end = new Date()
+  const start = new Date()
+  start.setDate(start.getDate() - 30)
+
   return {
     startTime: start.toISOString(),
     endTime: end.toISOString(),
-  };
+  }
 }
 
 export function CostChart() {
-  const [loading, setLoading] = useState(true);
-  const [chartData, setChartData] = useState<any>(null);
-  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(true)
+  const [chartData, setChartData] = useState<any>(null)
+  const [error, setError] = useState("")
 
   const loadData = async () => {
-    setLoading(true);
-    setError("");
+    setLoading(true)
+    setError("")
 
-    const defaultRange = getDefaultDateRange();
-    const params = new URLSearchParams();
-    params.set("metric", "credit_usage");
-    params.set("startTime", defaultRange.startTime);
-    params.set("endTime", defaultRange.endTime);
-    params.set("limit", "100");
+    const defaultRange = getDefaultDateRange()
+    const params = new URLSearchParams()
+    params.set("metric", "credit_usage")
+    params.set("startTime", defaultRange.startTime)
+    params.set("endTime", defaultRange.endTime)
+    params.set("limit", "100")
 
     try {
-      const res = await fetch(`/api/usage?${params.toString()}`);
-      const json = await res.json();
-      
+      const res = await fetch(`/api/usage?${params.toString()}`)
+      const json = await res.json()
+
       if (!res.ok) {
-        throw new Error(json.error || "Request failed");
+        throw new Error(json.error || "Request failed")
       }
 
-      const items = json.items || [];
+      const items = json.items || []
 
-      // Prepare chart data
-      const labels = items.map((i: any) => new Date(i.period));
-      const data = items.map((i: any) => i.count || 0);
+      const labels = items.map((i: any) => new Date(i.period))
+      const data = items.map((i: any) => i.count || 0)
 
       setChartData({
         labels,
         datasets: [
           {
-            label: 'Credit Usage',
+            label: "Credit Usage",
             data,
-            borderColor: "rgb(37, 99, 235)",
-            backgroundColor: "rgba(37, 99, 235, 0.15)",
+            borderColor: TAILADMIN_BLUE,
+            backgroundColor: TAILADMIN_BLUE_LIGHT,
             fill: true,
-            tension: 0.25,
+            tension: 0.4,
+            borderWidth: 2,
+            pointRadius: 0,
+            pointHoverRadius: 5,
+            pointBackgroundColor: TAILADMIN_BLUE,
+            pointBorderColor: "#fff",
+            pointBorderWidth: 2,
           },
         ],
-      });
+      })
     } catch (e: any) {
-      setError(e.message || String(e));
-      console.error("Error loading chart data:", e);
+      setError(e.message || String(e))
+      console.error("Error loading chart data:", e)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
-  // Auto-load data on mount
   useEffect(() => {
-    loadData();
-  }, []);
+    loadData()
+  }, [])
 
   const chartOptions = {
     responsive: true,
@@ -104,29 +101,67 @@ export function CostChart() {
       mode: "index" as const,
       intersect: false,
     },
+    plugins: {
+      legend: {
+        display: false,
+      },
+      tooltip: {
+        backgroundColor: "#1e293b",
+        titleColor: "#f8fafc",
+        bodyColor: "#f8fafc",
+        borderColor: "#334155",
+        borderWidth: 1,
+        padding: 12,
+        displayColors: false,
+      },
+    },
     scales: {
       x: {
         type: "time" as const,
         time: {
           unit: "day" as const,
         },
+        grid: {
+          display: true,
+          color: "rgba(148, 163, 184, 0.1)",
+          drawBorder: false,
+        },
+        ticks: {
+          color: "#94a3b8",
+          font: {
+            size: 12,
+          },
+        },
+        border: {
+          display: false,
+        },
       },
       y: {
         beginAtZero: true,
+        grid: {
+          display: true,
+          color: "rgba(148, 163, 184, 0.1)",
+          drawBorder: false,
+        },
+        ticks: {
+          color: "#94a3b8",
+          font: {
+            size: 12,
+          },
+          padding: 10,
+        },
+        border: {
+          display: false,
+        },
       },
     },
-    plugins: {
-      legend: {
-        display: false,
-      },
-    },
-  };
+  }
 
   return (
-    <Card className="border-card-border">
-      <CardHeader>
-        <CardTitle className="text-lg font-semibold flex items-center gap-2">
-          <BarChart3 className="h-5 w-5 text-primary" />
+    <Card className="border-border">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-base font-semibold flex items-center gap-2">
+          <BarChart3 className="h-5 w-5" style={{ color: TAILADMIN_BLUE }} />
           Usage Over Time
         </CardTitle>
       </CardHeader>
@@ -150,6 +185,5 @@ export function CostChart() {
         )}
       </CardContent>
     </Card>
-  );
+  )
 }
-

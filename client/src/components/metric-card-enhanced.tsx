@@ -36,7 +36,9 @@ export function MetricCardEnhanced({
               <p className="text-2xl md:text-3xl font-bold text-foreground break-all">{value}</p>
               {percentageChange !== undefined && (
                 <div
-                  className={`flex items-center gap-1 text-sm font-medium ${isPositive ? "text-blue-600 dark:text-blue-400" : "text-blue-600 dark:text-blue-400"}`}
+                  className={`flex items-center gap-1 text-sm font-medium ${
+                    isPositive ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400"
+                  }`}
                 >
                   {isPositive ? (
                     <TrendingUp className="w-4 h-4 flex-shrink-0" />

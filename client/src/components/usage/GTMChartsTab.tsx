@@ -166,6 +166,9 @@ const slideInAnimation = {
 const cardClassName =
   "bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-shadow duration-300"
 
+const TAILADMIN_BLUE = "#465FFF"
+const TAILADMIN_BLUE_LIGHT = "rgba(70, 95, 255, 0.12)"
+
 export default function GTMChartsTab() {
   const { toast } = useToast()
   const queryClient = useQueryClient()
@@ -615,10 +618,19 @@ export default function GTMChartsTab() {
                   ? "Clicks"
                   : "Conversions",
         data: gtmData.map((d) => d[metric]),
-        borderColor: "rgb(37, 99, 235)",
-        backgroundColor: chartType === "bar" ? "rgba(37, 99, 235, 0.8)" : "rgba(37, 99, 235, 0.15)",
+        borderColor: TAILADMIN_BLUE,
+        backgroundColor: chartType === "bar" ? TAILADMIN_BLUE : TAILADMIN_BLUE_LIGHT,
         fill: chartType === "line",
-        tension: 0.25,
+        tension: 0.4,
+        borderWidth: 2,
+        pointRadius: 0,
+        pointHoverRadius: 5,
+        pointBackgroundColor: TAILADMIN_BLUE,
+        pointBorderColor: "#fff",
+        pointBorderWidth: 2,
+        pointHoverBackgroundColor: TAILADMIN_BLUE,
+        pointHoverBorderColor: "#fff",
+        pointHoverBorderWidth: 2,
       },
     ],
   }
@@ -632,17 +644,16 @@ export default function GTMChartsTab() {
     },
     plugins: {
       legend: {
-        display: true,
-        position: "top" as const,
-        labels: {
-          color: "rgb(100, 116, 139)", // Slate color for dark mode compatibility
-          usePointStyle: true,
-          padding: 15,
-          font: {
-            size: 13,
-            weight: 500 as any, // CHANGE: Fix font weight TypeScript error - change "500" to 500 (number type)
-          },
-        },
+        display: false,
+      },
+      tooltip: {
+        backgroundColor: "#1e293b",
+        titleColor: "#f8fafc",
+        bodyColor: "#f8fafc",
+        borderColor: "#334155",
+        borderWidth: 1,
+        padding: 12,
+        displayColors: false,
       },
       filler: {
         propagate: true,
@@ -655,19 +666,36 @@ export default function GTMChartsTab() {
           unit: "day" as const,
         },
         grid: {
-          display: false,
+          display: true,
+          color: "rgba(148, 163, 184, 0.1)",
+          drawBorder: false,
         },
         ticks: {
-          color: "rgb(100, 116, 139)",
+          color: "#94a3b8",
+          font: {
+            size: 12,
+          },
+        },
+        border: {
+          display: false,
         },
       },
       y: {
         beginAtZero: true,
         grid: {
-          color: "rgba(59, 130, 246, 0.1)", // Blue grid lines
+          display: true,
+          color: "rgba(148, 163, 184, 0.1)",
+          drawBorder: false,
         },
         ticks: {
-          color: "rgb(100, 116, 139)",
+          color: "#94a3b8",
+          font: {
+            size: 12,
+          },
+          padding: 10,
+        },
+        border: {
+          display: false,
         },
       },
     },
@@ -679,7 +707,7 @@ export default function GTMChartsTab() {
       {
         data: trafficSources.map((t) => t.sessions),
         backgroundColor: [
-          "rgba(37, 99, 235, 0.8)",
+          TAILADMIN_BLUE,
           "rgba(16, 185, 129, 0.8)",
           "rgba(245, 158, 11, 0.8)",
           "rgba(239, 68, 68, 0.8)",
@@ -696,7 +724,7 @@ export default function GTMChartsTab() {
       {
         label: "Page Views",
         data: topPages.map((p) => p.views),
-        backgroundColor: "rgba(37, 99, 235, 0.8)",
+        backgroundColor: TAILADMIN_BLUE,
         borderRadius: 4,
       },
     ],
@@ -707,7 +735,7 @@ export default function GTMChartsTab() {
     datasets: [
       {
         data: deviceData.map((d) => d.sessions),
-        backgroundColor: ["rgba(37, 99, 235, 0.8)", "rgba(59, 130, 246, 0.8)", "rgba(96, 165, 250, 0.8)"],
+        backgroundColor: [TAILADMIN_BLUE, "rgba(59, 130, 246, 0.8)", "rgba(96, 165, 250, 0.8)"],
         borderWidth: 0,
       },
     ],
@@ -719,7 +747,7 @@ export default function GTMChartsTab() {
       {
         label: "Sessions",
         data: browserData.map((b) => b.sessions),
-        backgroundColor: ["rgba(37, 99, 235, 0.8)", "rgba(59, 130, 246, 0.8)", "rgba(96, 165, 250, 0.8)"],
+        backgroundColor: [TAILADMIN_BLUE, "rgba(59, 130, 246, 0.8)", "rgba(96, 165, 250, 0.8)"],
         borderRadius: 4,
       },
     ],
@@ -731,7 +759,7 @@ export default function GTMChartsTab() {
       {
         label: "Sessions",
         data: landingPages.map((p) => p.sessions),
-        backgroundColor: "rgba(37, 99, 235, 0.8)",
+        backgroundColor: TAILADMIN_BLUE,
         borderRadius: 4,
       },
     ],
@@ -803,7 +831,7 @@ export default function GTMChartsTab() {
       {
         label: "Searches",
         data: keywords.map((k) => k.searches),
-        backgroundColor: "rgba(37, 99, 235, 0.8)",
+        backgroundColor: TAILADMIN_BLUE,
         borderRadius: 4,
       },
     ],
@@ -815,7 +843,7 @@ export default function GTMChartsTab() {
       {
         label: "Clicks",
         data: campaigns.map((c) => c.clicks),
-        backgroundColor: "rgba(37, 99, 235, 0.8)",
+        backgroundColor: TAILADMIN_BLUE,
         borderRadius: 4,
       },
       {
@@ -835,7 +863,7 @@ export default function GTMChartsTab() {
       {
         label: "Page Views",
         data: topPagesForCombined.map((p) => p.views),
-        backgroundColor: "rgba(37, 99, 235, 0.8)",
+        backgroundColor: TAILADMIN_BLUE,
         yAxisID: "y",
         borderRadius: 4,
       },
@@ -1377,10 +1405,9 @@ export default function GTMChartsTab() {
           <p className="text-sm text-muted-foreground">
             Track page views, sessions, users, clicks, conversions, traffic sources, and more
           </p>
-          </div>
-         
+        </div>
+
         <div>
-         
           {gtmStatus?.connected && (
             <p className="text-xs text-muted-foreground mt-1">
               GTM Connected: Account {gtmStatus.accountId} | Container {gtmStatus.containerId}

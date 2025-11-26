@@ -108,7 +108,15 @@
     "wouter": "^3.3.5",
     "ws": "^8.18.0",
     "zod": "^3.24.2",
-    "zod-validation-error": "^3.4.0"
+    "zod-validation-error": "^3.4.0",
+    "fs": "0.0.1-security",
+    "path": "0.12.7",
+    "url": "0.11.4",
+    "buffer": "6.0.3",
+    "http": "0.0.1-security",
+    "crypto": "1.0.1",
+    "nanoid": "5.1.6",
+    "next": "16.0.4"
   },
   "devDependencies": {
     "@playwright/test": "^1.56.1",

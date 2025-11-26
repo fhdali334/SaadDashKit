@@ -8,6 +8,9 @@ interface StatisticsChartProps {
   data: UsageData[]
 }
 
+const TAILADMIN_BLUE = "#465FFF"
+const TAILADMIN_BLUE_LIGHT = "rgba(70, 95, 255, 0.12)"
+
 export function StatisticsChart({ data }: StatisticsChartProps) {
   const chartData =
     data.length > 0
@@ -21,12 +24,12 @@ export function StatisticsChart({ data }: StatisticsChartProps) {
       : []
 
   return (
-    <Card className="border-card-border col-span-full">
+    <Card className="border-border col-span-full">
       <CardHeader className="pb-4">
         <div className="flex items-center justify-between flex-wrap gap-4">
           <div>
-            <CardTitle className="text-lg font-semibold flex items-center gap-2">
-              <TrendingUp className="w-5 h-5 text-primary" />
+            <CardTitle className="text-base font-semibold flex items-center gap-2">
+              <TrendingUp className="w-5 h-5" style={{ color: TAILADMIN_BLUE }} />
               Usage Statistics
             </CardTitle>
             <p className="text-sm text-muted-foreground mt-1">API requests over time</p>
@@ -50,36 +53,37 @@ export function StatisticsChart({ data }: StatisticsChartProps) {
             <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
               <defs>
                 <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                  <stop offset="5%" stopColor={TAILADMIN_BLUE} stopOpacity={0.15} />
+                  <stop offset="95%" stopColor={TAILADMIN_BLUE} stopOpacity={0} />
                 </linearGradient>
                 <linearGradient id="colorSuccess" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#22c55e" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="#22c55e" stopOpacity={0} />
+                  <stop offset="5%" stopColor="#10b981" stopOpacity={0.15} />
+                  <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(148, 163, 184, 0.1)" />
               <XAxis
                 dataKey="name"
                 axisLine={false}
                 tickLine={false}
-                tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }}
+                tick={{ fill: "#94a3b8", fontSize: 12 }}
                 dy={10}
               />
-              <YAxis axisLine={false} tickLine={false} tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }} />
+              <YAxis axisLine={false} tickLine={false} tick={{ fill: "#94a3b8", fontSize: 12 }} />
               <Tooltip
                 contentStyle={{
-                  backgroundColor: "hsl(var(--popover))",
-                  border: "1px solid hsl(var(--border))",
-                  borderRadius: "var(--radius)",
+                  backgroundColor: "#1e293b",
+                  border: "1px solid #334155",
+                  borderRadius: "8px",
+                  color: "#f8fafc",
                 }}
-                itemStyle={{ color: "hsl(var(--popover-foreground))" }}
-                labelStyle={{ color: "hsl(var(--muted-foreground))" }}
+                itemStyle={{ color: "#f8fafc" }}
+                labelStyle={{ color: "#94a3b8" }}
               />
               <Area
                 type="monotone"
                 dataKey="total"
-                stroke="hsl(var(--primary))"
+                stroke={TAILADMIN_BLUE}
                 strokeWidth={2}
                 fillOpacity={1}
                 fill="url(#colorTotal)"
@@ -88,7 +92,7 @@ export function StatisticsChart({ data }: StatisticsChartProps) {
               <Area
                 type="monotone"
                 dataKey="success"
-                stroke="#22c55e"
+                stroke="#10b981"
                 strokeWidth={2}
                 fillOpacity={1}
                 fill="url(#colorSuccess)"

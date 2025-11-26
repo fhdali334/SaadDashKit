@@ -3,6 +3,7 @@
 import { useState } from "react"
 import GTMChartsTab from "@/components/usage/GTMChartsTab"
 import { UsageAnalyticsSection } from "@/components/usage/usage-analytics-section"
+import { BarChart3, Activity, TrendingUp } from "lucide-react"
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -17,64 +18,66 @@ import {
 } from "chart.js"
 import "chartjs-adapter-luxon"
 
-// Register Chart.js components
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler, TimeScale)
 
-// Get default date range (last 30 days)
-function getDefaultDateRange() {
-  const end = new Date()
-  const start = new Date()
-  start.setDate(start.getDate() - 30)
-
-  return {
-    startTime: start.toISOString(),
-    endTime: end.toISOString(),
-  }
-}
+const TAILADMIN_BLUE = "#465FFF"
+const TAILADMIN_BLUE_LIGHT = "rgba(70, 95, 255, 0.08)"
 
 export default function Usage() {
   const [activeTab, setActiveTab] = useState("usage")
 
-  return (
-    <div className="h-full overflow-y-auto bg-background">
-      <div className="max-w-7xl mx-auto px-6 pt-8 md:px-8 md:pt-12">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-foreground mb-2">Usage Analytics</h1>
-          <p className="text-sm text-muted-foreground">
-            Track usage metrics, performance analytics, and advanced GTM insights
-          </p>
-        </div>
+  const tabs = [
+    { id: "usage", label: "Usage Analytics", icon: Activity },
+    { id: "gtm", label: "GTM Analytics", icon: TrendingUp },
+  ]
 
-        <div className="border-b border-blue-200 dark:border-blue-800 mb-8">
-          <div className="flex gap-1 -mb-px">
-            <button
-              onClick={() => setActiveTab("usage")}
-              className={`px-4 py-3 text-sm font-medium transition-all duration-200 border-b-2 ${
-                activeTab === "usage"
-                  ? "text-blue-600 dark:text-blue-400 border-blue-600 dark:border-blue-400"
-                  : "text-muted-foreground border-transparent hover:text-foreground"
-              }`}
-            >
-              Usage Analytics
-            </button>
-            <button
-              onClick={() => setActiveTab("gtm")}
-              className={`px-4 py-3 text-sm font-medium transition-all duration-200 border-b-2 ${
-                activeTab === "gtm"
-                  ? "text-blue-600 dark:text-blue-400 border-blue-600 dark:border-blue-400"
-                  : "text-muted-foreground border-transparent hover:text-foreground"
-              }`}
-            >
-              GTM Analytics
-            </button>
+  return (
+    <div className="min-h-screen bg-background">
+      <header className="bg-card border-b border-border sticky top-0 z-10">
+        <div className="px-6 lg:px-8 py-5">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div
+                className="w-10 h-10 rounded-xl flex items-center justify-center"
+                style={{ backgroundColor: TAILADMIN_BLUE }}
+              >
+                <BarChart3 className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h1 className="text-2xl lg:text-3xl font-bold text-foreground">Usage Analytics</h1>
+                <p className="text-sm text-muted-foreground">
+                  Track usage metrics, performance analytics, and advanced GTM insights
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-6 flex gap-2">
+            {tabs.map((tab) => {
+              const Icon = tab.icon
+              const isActive = activeTab === tab.id
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-medium transition-all ${
+                    isActive ? "text-white shadow-lg" : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  }`}
+                  style={isActive ? { backgroundColor: TAILADMIN_BLUE } : undefined}
+                >
+                  <Icon className="w-4 h-4" />
+                  {tab.label}
+                </button>
+              )
+            })}
           </div>
         </div>
-      </div>
+      </header>
 
-      <div className="max-w-7xl mx-auto px-6 pb-8 md:px-8 md:pb-12">
+      <main className="px-6 lg:px-8 py-8">
         {activeTab === "usage" && <UsageAnalyticsSection />}
         {activeTab === "gtm" && <GTMChartsTab />}
-      </div>
+      </main>
     </div>
   )
 }

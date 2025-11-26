@@ -74,7 +74,7 @@ function CheckoutForm({ amount, onSuccess, type }: { amount: number; onSuccess: 
           title: "Payment Successful",
           description: type === "voiceflow_credits" 
             ? `Successfully purchased ${creditsToAdd?.toLocaleString()} chatbot credits!`
-            : `$${amount.toFixed(2)} has been added to your account!`,
+            : `$${amount} has been added to your account!`,
         });
         await queryClient.invalidateQueries({ queryKey: ["/api/account"] });
         await queryClient.invalidateQueries({ queryKey: ["/api/transactions"] });
@@ -109,7 +109,7 @@ function CheckoutForm({ amount, onSuccess, type }: { amount: number; onSuccess: 
         ) : (
           <>
             <Check className="mr-2 h-4 w-4" />
-            Pay ${amount.toFixed(2)}
+            {"Pay $" + amount}
           </>
         )}
       </Button>
@@ -201,9 +201,9 @@ export function TopUpModal({ isOpen, onClose, currentLimit, creditsUsed, type = 
               <>Purchase chatbot credits via Stripe payment</>
             ) : (
               <>
-                Credit limit: <span className="font-semibold text-foreground">${currentLimit.toFixed(2)}</span> |
-                Used: <span className="font-semibold text-foreground">${creditsUsed.toFixed(2)}</span> |
-                Remaining: <span className="font-semibold text-foreground">${(currentLimit - creditsUsed).toFixed(2)}</span>
+                Credit limit: <span className="font-semibold text-foreground">{`$${currentLimit}`}</span> |
+                Used: <span className="font-semibold text-foreground">{`$${creditsUsed}`}</span> |
+                Remaining: <span className="font-semibold text-foreground">{`$${(currentLimit - creditsUsed)}`}</span>
               </>
             )}
           </DialogDescription>
@@ -262,7 +262,7 @@ export function TopUpModal({ isOpen, onClose, currentLimit, creditsUsed, type = 
               )}
               <div className="flex justify-between mb-4">
                 <span className="text-muted-foreground">Amount to {type === "voiceflow_credits" ? "pay" : "add"}:</span>
-                <span className="font-semibold text-xl text-foreground">${selectedAmount.toFixed(2)}</span>
+                <span className="font-semibold text-xl text-foreground">{`$${selectedAmount}`}</span>
               </div>
               <Button
                 onClick={handleProceedToCheckout}

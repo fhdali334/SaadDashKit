@@ -11,6 +11,7 @@ import {
   Database,
   DollarSign,
   Brain,
+  ChevronRight,
 } from "lucide-react"
 import { Link, useLocation } from "wouter"
 import {
@@ -28,6 +29,8 @@ import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { useTheme } from "./theme-provider"
 import { logout, getProjectId } from "@/lib/auth"
+
+const TAILADMIN_BLUE = "#465FFF"
 
 const menuItems = [
   {
@@ -78,81 +81,114 @@ export function AppSidebar() {
   }
 
   return (
-    <Sidebar>
-      <SidebarContent>
+    <Sidebar className="border-r border-sidebar-border bg-sidebar">
+      <SidebarContent className="px-4">
         <SidebarGroup>
-          <SidebarGroupLabel className="px-4 py-6 mb-2">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-md bg-primary flex items-center justify-center flex-shrink-0">
-                <BarChart3 className="w-5 h-5 text-primary-foreground" />
+          <SidebarGroupLabel className="py-6 mb-2">
+            <div className="flex items-center gap-3">
+              <div
+                className="w-10 h-10 rounded-xl flex items-center justify-center"
+                style={{ backgroundColor: TAILADMIN_BLUE }}
+              >
+                <BarChart3 className="w-5 h-5 text-white" />
               </div>
-              <span className="text-base font-bold text-foreground">TailAdmin</span>
+              <div className="flex flex-col">
+                <span className="text-base font-bold text-sidebar-foreground">TailAdmin</span>
+                <span className="text-xs text-sidebar-foreground/60">Dashboard Pro</span>
+              </div>
             </div>
           </SidebarGroupLabel>
+
+          <div className="px-3 mb-3">
+            <span className="text-xs font-medium text-sidebar-foreground/50 uppercase tracking-wider">Menu</span>
+          </div>
+
           <SidebarGroupContent>
-            <SidebarMenu className="gap-1">
-              {menuItems.map((item) => {
-                const isActive = location === item.url
-                return (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton
-                      asChild
-                      isActive={isActive}
-                      className={
-                        isActive
-                          ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                          : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-                      }
-                    >
-                      <Link href={item.url} data-testid={`link-${item.title.toLowerCase().replace(/\s+/g, "-")}`}>
-                        <item.icon className="w-4 h-4" />
-                        <span className="font-medium">{item.title}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                )
-              })}
-            </SidebarMenu>
+         <SidebarMenu className="gap-1">
+  {menuItems.map((item) => {
+    const isActive = location === item.url
+
+    return (
+      <SidebarMenuItem key={item.title}>
+        <SidebarMenuButton
+          asChild
+          isActive={isActive}
+          className={`h-11 rounded-xl transition-all duration-200 ${
+            isActive
+              ? "text-white font-medium"
+              : "text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent"
+          }`}
+          style={isActive ? { backgroundColor: TAILADMIN_BLUE } : undefined}
+        >
+          <Link href={item.url}>
+            {/* Icon color update */}
+            <item.icon
+              className={`w-5 h-5 ${
+                isActive ? "text-white" : "text-sidebar-foreground/70"
+              }`}
+            />
+
+            {/* Text color update */}
+            <span
+              className={`flex-1 ${
+                isActive ? "text-white" : "text-sidebar-foreground/70"
+              }`}
+            >
+              {item.title}
+            </span>
+
+            {isActive && <ChevronRight className="w-4 h-4 opacity-70 text-white" />}
+          </Link>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+    )
+  })}
+</SidebarMenu>
+
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter>
-        <div className="p-4 space-y-3">
+
+      <SidebarFooter className="px-4 pb-6">
+        <div className="space-y-3">
           {projectId && (
             <>
-              <div className="text-xs text-muted-foreground px-3 py-2 bg-sidebar-accent rounded-md border border-sidebar-border">
-                Project: {projectId.slice(0, 8)}...
+              <div className="text-xs text-sidebar-foreground/60 px-3 py-3 bg-sidebar-accent rounded-xl border border-sidebar-border">
+                <span className="block text-sidebar-foreground/50 mb-1">Project ID</span>
+                <span className="font-mono text-sidebar-foreground">{projectId.slice(0, 12)}...</span>
               </div>
-              <Separator className="my-1" />
+              <Separator className="my-2 bg-sidebar-border" />
             </>
           )}
+
           <Button
-            variant="outline"
+            variant="ghost"
             size="sm"
             onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            className="w-full justify-start"
+            className="w-full justify-start h-11 rounded-xl text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent"
             data-testid="button-theme-toggle"
           >
             {theme === "dark" ? (
               <>
-                <Sun className="w-4 h-4 mr-2" />
+                <Sun className="w-5 h-5 mr-3" />
                 Light Mode
               </>
             ) : (
               <>
-                <Moon className="w-4 h-4 mr-2" />
+                <Moon className="w-5 h-5 mr-3" />
                 Dark Mode
               </>
             )}
           </Button>
+
           <Button
-            variant="outline"
+            variant="ghost"
             size="sm"
             onClick={handleLogout}
-            className="w-full justify-start bg-transparent"
+            className="w-full justify-start h-11 rounded-xl text-sidebar-foreground/70 hover:text-red-500 hover:bg-red-500/10"
             data-testid="button-logout"
           >
-            <LogOut className="w-4 h-4 mr-2" />
+            <LogOut className="w-5 h-5 mr-3" />
             Logout
           </Button>
         </div>

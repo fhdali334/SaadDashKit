@@ -91,7 +91,7 @@ export function BuyCreditsModal({ isOpen, onClose, type, currentBalance }: BuyCr
     if (selectedAmount > currentBalance) {
       toast({
         title: "Insufficient Balance",
-        description: `You have $${currentBalance.toFixed(2)} available, but need $${selectedAmount.toFixed(2)}`,
+        description: `You have $${currentBalance} available, but need $${selectedAmount}`,
         variant: "destructive",
       });
       return;
@@ -129,7 +129,7 @@ export function BuyCreditsModal({ isOpen, onClose, type, currentBalance }: BuyCr
             )}
           </DialogTitle>
           <DialogDescription>
-            Available balance: <span className="font-semibold text-foreground">${currentBalance.toFixed(2)}</span>
+            Available balance: <span className="font-semibold text-foreground">${currentBalance}</span>
           </DialogDescription>
         </DialogHeader>
 
@@ -188,7 +188,7 @@ export function BuyCreditsModal({ isOpen, onClose, type, currentBalance }: BuyCr
               <div className="flex justify-between items-center">
                 <span className="text-muted-foreground">Balance will increase by:</span>
                 <span className="font-bold text-xl text-foreground">
-                  ${selectedAmount.toFixed(2)}
+                  ${selectedAmount}
                 </span>
               </div>
             </div>
@@ -197,7 +197,7 @@ export function BuyCreditsModal({ isOpen, onClose, type, currentBalance }: BuyCr
           <div className="pt-4 border-t">
             <div className="flex justify-between mb-4">
               <span className="text-muted-foreground">Amount to spend:</span>
-              <span className="font-semibold text-xl text-foreground">${selectedAmount.toFixed(2)}</span>
+              <span className="font-semibold text-xl text-foreground">${selectedAmount}</span>
             </div>
             <Button
               onClick={handlePurchase}
@@ -220,7 +220,7 @@ export function BuyCreditsModal({ isOpen, onClose, type, currentBalance }: BuyCr
                   ) : (
                     <>
                       <Brain className="mr-2 h-4 w-4" />
-                      Add ${selectedAmount.toFixed(2)} Balance
+                      Add ${selectedAmount} Balance
                     </>
                   )}
                 </>
