@@ -12,8 +12,8 @@ import { Button } from "@/components/ui/button"
 import { queryClient, apiRequest } from "@/lib/queryClient"
 import { useLocation } from "wouter"
 
-const TAILADMIN_BLUE = "#465FFF"
-const TAILADMIN_BLUE_LIGHT = "rgba(70, 95, 255, 0.08)"
+const TAILADMIN_PURPLE = "#9333EA"
+const TAILADMIN_PURPLE_LIGHT = "rgba(147, 51, 234, 0.08)"
 
 export default function Transcripts() {
   const [selectedTranscriptId, setSelectedTranscriptId] = useState<string | null>(null)
@@ -158,7 +158,7 @@ export default function Transcripts() {
             <div className="flex items-center gap-3">
               <div
                 className="w-10 h-10 rounded-xl flex items-center justify-center"
-                style={{ backgroundColor: TAILADMIN_BLUE }}
+                style={{ backgroundColor: TAILADMIN_PURPLE }}
               >
                 <MessageSquare className="w-5 h-5 text-white" />
               </div>
@@ -244,9 +244,9 @@ export default function Transcripts() {
             <div className="flex flex-col h-full items-center justify-center">
               <div
                 className="w-20 h-20 rounded-2xl flex items-center justify-center mb-6"
-                style={{ backgroundColor: TAILADMIN_BLUE_LIGHT }}
+                style={{ backgroundColor: TAILADMIN_PURPLE_LIGHT }}
               >
-                <MessageSquare className="w-10 h-10" style={{ color: TAILADMIN_BLUE }} />
+                <MessageSquare className="w-10 h-10" style={{ color: TAILADMIN_PURPLE }} />
               </div>
               <p className="text-xl font-semibold text-foreground mb-2">Select a transcript</p>
               <p className="text-muted-foreground">Choose a conversation from the list to view</p>

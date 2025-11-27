@@ -129,7 +129,7 @@ export default function KnowledgeBase() {
 
         {/* Content Area */}
         {mainTab === "qa" && (
-          <div className="bg-card rounded-2xl border border-border overflow-hidden">
+          <div className="bg-card rounded-3xl border border-border overflow-hidden shadow-sm hover:shadow-md transition-all">
             <QATab />
           </div>
         )}
@@ -137,7 +137,7 @@ export default function KnowledgeBase() {
         {mainTab === "products" && (
           <div className="space-y-6">
             {/* Sub-tab Navigation */}
-            <div className="bg-card rounded-2xl border border-border p-2">
+            <div className="bg-card rounded-3xl border border-border p-3 shadow-sm">
               <div className="flex flex-wrap gap-2">
                 {productSubTabs.map((tab) => {
                   const Icon = tab.icon
@@ -147,7 +147,7 @@ export default function KnowledgeBase() {
                       key={tab.id}
                       onClick={() => setProductSubTab(tab.id)}
                       className={cn(
-                        "flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-medium transition-all flex-1 sm:flex-none justify-center sm:justify-start",
+                        "flex items-center gap-2 px-5 py-3 rounded-2xl text-sm font-medium transition-all flex-1 sm:flex-none justify-center sm:justify-start",
                         isActive
                           ? "text-white shadow-lg"
                           : "text-muted-foreground hover:bg-muted hover:text-foreground",
@@ -162,8 +162,8 @@ export default function KnowledgeBase() {
               </div>
             </div>
 
-            {/* Sub-tab Content */}
-            <div className="bg-card rounded-2xl border border-border overflow-hidden">
+            {/* Sub-tab Content with enhanced styling */}
+            <div className="bg-card rounded-3xl border border-border overflow-hidden shadow-sm hover:shadow-md transition-all">
               {productSubTab === "api" && <AuthTab />}
               {productSubTab === "single" && <AddProductTab />}
               {productSubTab === "bulk" && <BulkUploadTab />}

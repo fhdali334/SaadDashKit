@@ -11,12 +11,14 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Label } from "@/components/ui/label"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
+import { KeywordHexagonChart } from "@/components/keyword-hexagon-chart"
+import { AdvancedHexagonChart } from "@/components/advanced-hexagon charts"
+
 import {
   Brain,
   Download,
   TrendingUp,
   FileText,
-  Hash,
   MessageSquare,
   Sparkles,
   BarChart3,
@@ -333,8 +335,7 @@ export default function AiAnalysis() {
 
             {/* Charts and History */}
             <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
-              {/* Token Usage Chart */}
-              <Card className="border-border rounded-2xl">
+              <Card className="border-border rounded-3xl shadow-sm hover:shadow-md transition-all">
                 <CardHeader className="px-6 pt-6 pb-2">
                   <div className="flex items-center gap-3">
                     <div
@@ -370,7 +371,7 @@ export default function AiAnalysis() {
                             borderRadius: "12px",
                           }}
                         />
-                        <Bar dataKey="tokens" fill={TAILADMIN_BLUE} radius={[4, 4, 0, 0]} />
+                        <Bar dataKey="tokens" fill={TAILADMIN_BLUE} radius={[8, 8, 0, 0]} />
                       </BarChart>
                     </ResponsiveContainer>
                   ) : (
@@ -381,8 +382,7 @@ export default function AiAnalysis() {
                 </CardContent>
               </Card>
 
-              {/* Analysis History */}
-              <Card className="border-border rounded-2xl xl:col-span-3">
+              <Card className="border-border rounded-3xl shadow-sm hover:shadow-md transition-all xl:col-span-3">
                 <CardHeader className="px-6 pt-6 pb-4">
                   <div className="flex items-center gap-3">
                     <div
@@ -410,7 +410,7 @@ export default function AiAnalysis() {
                         sortedAnalyses.map((analysis) => (
                           <div
                             key={analysis.id}
-                            className={`p-4 rounded-xl border cursor-pointer transition-all hover:shadow-md ${
+                            className={`p-4 rounded-2xl border cursor-pointer transition-all hover:shadow-md ${
                               selectedAnalysisId === analysis.id
                                 ? "border-2 bg-muted/30"
                                 : "border-border hover:border-muted-foreground/30"
@@ -524,39 +524,8 @@ export default function AiAnalysis() {
             {/* Keywords and Keyphrases */}
             {selectedAnalysisId && analysisDetails && !isLoadingDetails && (
               <div className="grid gap-6 lg:grid-cols-2">
-                <Card className="border-border rounded-2xl">
-                  <CardHeader className="px-6 pt-6 pb-4">
-                    <div className="flex items-center gap-3">
-                      <div
-                        className="w-10 h-10 rounded-xl flex items-center justify-center"
-                        style={{ backgroundColor: TAILADMIN_BLUE_LIGHT }}
-                      >
-                        <Hash className="w-5 h-5" style={{ color: TAILADMIN_BLUE }} />
-                      </div>
-                      <div>
-                        <CardTitle className="text-lg font-semibold">Top Keywords</CardTitle>
-                        <CardDescription>Most frequent terms in conversations</CardDescription>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="px-6 pb-6">
-                    <div className="flex flex-wrap gap-2">
-                      {analysisDetails.keywords?.slice(0, 20).map((kw) => (
-                        <Badge
-                          key={kw.id}
-                          variant="secondary"
-                          className="px-3 py-1.5 rounded-lg text-sm"
-                          style={{
-                            backgroundColor: TAILADMIN_BLUE_LIGHT,
-                            color: TAILADMIN_BLUE,
-                          }}
-                        >
-                          {kw.keyword} ({kw.frequency})
-                        </Badge>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
+                <KeywordHexagonChart keywords={analysisDetails.keywords} />
+                <AdvancedHexagonChart keywords={analysisDetails.keywords} />
 
                 <Card className="border-border rounded-2xl">
                   <CardHeader className="px-6 pt-6 pb-4">
@@ -575,7 +544,7 @@ export default function AiAnalysis() {
                   </CardHeader>
                   <CardContent className="px-6 pb-6">
                     <div className="space-y-3">
-                      {analysisDetails.keyphrases?.slice(0, 10).map((kp) => (
+                      {(analysisDetails.keyphrases ?? []).slice(0, 10).map((kp) => (
                         <div key={kp.id} className="flex items-center justify-between p-3 bg-muted/30 rounded-xl">
                           <span className="text-sm font-medium text-foreground">{kp.keyphrase}</span>
                           <Badge variant="outline" className="rounded-lg">

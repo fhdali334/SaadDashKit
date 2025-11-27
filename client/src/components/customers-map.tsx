@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { MoreVertical } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { ComposableMap, Geographies, Geography, Marker } from "react-simple-maps"
+import { ComposableMap, Geographies, Geography } from "react-simple-maps"
 
 const geoUrl = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json"
 
@@ -11,6 +11,15 @@ const markers = [
 ]
 
 export function CustomersMap() {
+  const isDark = typeof window !== "undefined" && window.matchMedia("(prefers-color-scheme: dark)").matches
+
+  const lightModeFill = "#e5e7eb" // Light grey for light mode countries
+  const darkModeFill = "#2d3748" // Darker grey for dark mode countries
+  const lightModeStroke = "#d1d5db" // Light border for light mode
+  const darkModeStroke = "#374151" // Darker border for dark mode
+  const lightModeHoverFill = "#60a5fa" // Light blue hover
+  const darkModeHoverFill = "#60a5fa" // Light blue hover for dark mode
+
   return (
     <Card className="h-full border-card-border shadow-sm flex flex-col">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-7">
@@ -23,12 +32,12 @@ export function CustomersMap() {
         </Button>
       </CardHeader>
       <CardContent className="flex-1 flex flex-col justify-between">
-        <div className="relative w-full h-[400px] bg-slate-900/50 rounded-lg overflow-hidden border border-slate-800">
+        <div className="relative w-full h-[400px] rounded-lg overflow-hidden border border-border bg-muted/30">
           <ComposableMap
             projection="geoMercator"
             projectionConfig={{
               scale: 120,
-              center: [0, 30], // Adjust center to show relevant areas better
+              center: [0, 30],
             }}
             className="w-full h-full"
           >
@@ -38,25 +47,23 @@ export function CustomersMap() {
                   <Geography
                     key={geo.rsmKey}
                     geography={geo}
-                    fill="#374151"
-                    stroke="#1f2937"
+                    fill={isDark ? darkModeFill : lightModeFill}
+                    stroke={isDark ? darkModeStroke : lightModeStroke}
                     strokeWidth={0.5}
                     style={{
-                      default: { outline: "none" },
-                      hover: { fill: "#3b82f6", outline: "none" },
-                      pressed: { fill: "#3b82f6", outline: "none" },
+                      default: { outline: "none", cursor: "pointer", transition: "all 200ms" },
+                      hover: {
+                        fill: lightModeHoverFill,
+                        outline: "none",
+                        cursor: "pointer",
+                      },
+                      pressed: { fill: lightModeHoverFill, outline: "none" },
                     }}
                   />
                 ))
               }
             </Geographies>
-            {markers.map(({ name, coordinates, markerOffset }) => (
-              <Marker key={name} coordinates={coordinates as [number, number]}>
-                <circle r={6} fill="#3b82f6" className="animate-ping opacity-75" />
-                <circle r={3} fill="#60a5fa" stroke="#1d4ed8" strokeWidth={1} />
-                {/* Optional: Add labels if needed, but the list below handles text */}
-              </Marker>
-            ))}
+            {/* Markers removed per client request */}
           </ComposableMap>
         </div>
 

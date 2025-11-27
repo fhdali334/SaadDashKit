@@ -19,6 +19,7 @@ import {
   ArrowUpRight,
   ArrowDownRight,
   BarChart3,
+  TrendingUp,
 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { SimulateUsageModal } from "@/components/simulate-usage-modal"
@@ -518,55 +519,197 @@ export default function Cost() {
           />
         </div>
 
-        {/* Usage Panels */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <UsagePanel
-            title="OpenAI Usage"
-            subtitle="Balance usage"
-            icon={Brain}
-            used={usageData.openai.costUsd}
-            total={usageData.account.initialBalance}
-            remaining={usageData.account.remainingBalance}
-            showUsd={true}
-            onBuy={() => {
-              setPurchaseType("openai")
-              setShowBuyCreditsModal(true)
-            }}
-          />
-          <UsagePanel
-            title="Chatbot Credits"
-            subtitle="Credit consumption"
-            icon={Zap}
-            used={usageData.chatbot.creditsUsed}
-            total={usageData.chatbot.creditsTotal}
-            remaining={usageData.chatbot.creditsRemaining}
-            onBuy={async () => {
-              try {
-                const res = await fetch("/api/purchase/chatbot-credits", {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  credentials: "include",
-                  body: JSON.stringify({ amount: 30 }),
-                })
-                if (!res.ok) {
-                  const error = await res.json()
-                  throw new Error(error.error || "Purchase failed")
+        {/* Cost Section with Overlapping Charts and Breakdowns */}
+        <div className="space-y-8">
+          {/* Cost Section Header */}
+          <div className="bg-card rounded-2xl border border-border p-6 space-y-6">
+            <div className="flex items-center gap-3">
+              <div
+                className="w-10 h-10 rounded-xl flex items-center justify-center"
+                style={{ backgroundColor: TAILADMIN_BLUE_LIGHT }}
+              >
+                <TrendingUp className="w-5 h-5" style={{ color: TAILADMIN_BLUE }} />
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-foreground">Cost Breakdown</h2>
+                <p className="text-sm text-muted-foreground">Detailed usage and cost analysis</p>
+              </div>
+            </div>
+
+            {/* Cost Overview Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="p-4 rounded-xl bg-muted/50 border border-border/50">
+                <p className="text-sm text-muted-foreground mb-2">Total Spent</p>
+                <p className="text-2xl font-bold text-foreground">${usageData.openai.costUsd.toFixed(2)}</p>
+                <p className="text-xs text-muted-foreground mt-2">
+                  ${(usageData.openai.costUsd / Math.max(1, usageData.openai.tokensUsed)).toFixed(4)} per token
+                </p>
+              </div>
+              <div className="p-4 rounded-xl bg-muted/50 border border-border/50">
+                <p className="text-sm text-muted-foreground mb-2">Budget Remaining</p>
+                <p className="text-2xl font-bold text-foreground">${usageData.account.remainingBalance.toFixed(2)}</p>
+                <p className="text-xs text-muted-foreground mt-2">
+                  {((usageData.account.remainingBalance / usageData.account.initialBalance) * 100).toFixed(1)}% of
+                  budget
+                </p>
+              </div>
+              <div className="p-4 rounded-xl bg-muted/50 border border-border/50">
+                <p className="text-sm text-muted-foreground mb-2">System Costs</p>
+                <p className="text-2xl font-bold text-foreground">${usageData.openai.systemCost.toFixed(2)}</p>
+                <p className="text-xs text-muted-foreground mt-2">Infrastructure & maintenance</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Usage Panels with Overlapping Data */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <UsagePanel
+              title="OpenAI Usage"
+              subtitle="Balance usage and consumption"
+              icon={Brain}
+              used={usageData.openai.costUsd}
+              total={usageData.account.initialBalance}
+              remaining={usageData.account.remainingBalance}
+              showUsd={true}
+              onBuy={() => {
+                setPurchaseType("openai")
+                setShowBuyCreditsModal(true)
+              }}
+            />
+            <UsagePanel
+              title="Chatbot Credits"
+              subtitle="Credit consumption tracking"
+              icon={Zap}
+              used={usageData.chatbot.creditsUsed}
+              total={usageData.chatbot.creditsTotal}
+              remaining={usageData.chatbot.creditsRemaining}
+              onBuy={async () => {
+                try {
+                  const res = await fetch("/api/purchase/chatbot-credits", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    credentials: "include",
+                    body: JSON.stringify({ amount: 30 }),
+                  })
+                  if (!res.ok) {
+                    const error = await res.json()
+                    throw new Error(error.error || "Purchase failed")
+                  }
+                  const data = await res.json()
+                  toast({
+                    title: "Purchase Successful",
+                    description: `Successfully purchased ${data.credits.toLocaleString()} chatbot credits!`,
+                  })
+                  queryClient.invalidateQueries({ queryKey: ["/api/account"] })
+                } catch (error: any) {
+                  toast({
+                    title: "Purchase Failed",
+                    description: error.message || "An error occurred",
+                    variant: "destructive",
+                  })
                 }
-                const data = await res.json()
-                toast({
-                  title: "Purchase Successful",
-                  description: `Successfully purchased ${data.credits.toLocaleString()} chatbot credits!`,
-                })
-                queryClient.invalidateQueries({ queryKey: ["/api/account"] })
-              } catch (error: any) {
-                toast({
-                  title: "Purchase Failed",
-                  description: error.message || "An error occurred",
-                  variant: "destructive",
-                })
-              }
-            }}
-          />
+              }}
+            />
+          </div>
+
+          {/* Overlapping Charts for AI Tokens and Chatbot Credits */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* AI Tokens Usage Chart with Comparative Metrics */}
+            <Card className="border-border rounded-2xl overflow-hidden">
+              <CardHeader className="pb-2 px-6 pt-6">
+                <div className="flex items-center gap-3">
+                  <div
+                    className="w-10 h-10 rounded-xl flex items-center justify-center"
+                    style={{ backgroundColor: TAILADMIN_BLUE_LIGHT }}
+                  >
+                    <Brain className="w-5 h-5" style={{ color: TAILADMIN_BLUE }} />
+                  </div>
+                  <div>
+                    <CardTitle className="text-lg font-semibold">AI Tokens Usage</CardTitle>
+                    <p className="text-sm text-muted-foreground mt-0.5">
+                      Tokens consumed over time with cost projection
+                    </p>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="px-6 pb-6">
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="p-3 rounded-xl bg-muted/50 border border-border/50">
+                      <p className="text-xs text-muted-foreground mb-1">Tokens Used</p>
+                      <p className="text-xl font-bold text-foreground">
+                        {usageData.openai.tokensUsed.toLocaleString()}
+                      </p>
+                    </div>
+                    <div className="p-3 rounded-xl bg-muted/50 border border-border/50">
+                      <p className="text-xs text-muted-foreground mb-1">Cost per 1K Tokens</p>
+                      <p className="text-xl font-bold text-foreground">
+                        ${((usageData.openai.costUsd / usageData.openai.tokensUsed) * 1000).toFixed(4)}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="h-3 bg-muted rounded-full overflow-hidden">
+                    <div
+                      className="h-full rounded-full transition-all duration-500"
+                      style={{
+                        width: `${Math.min(100, (usageData.openai.tokensUsed / 500000) * 100)}%`,
+                        backgroundColor: TAILADMIN_BLUE,
+                      }}
+                    />
+                  </div>
+                  <p className="text-xs text-muted-foreground">Monthly token allocation: 500,000 tokens</p>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Chatbot Credits Usage Chart with Comparative Metrics */}
+            <Card className="border-border rounded-2xl overflow-hidden">
+              <CardHeader className="pb-2 px-6 pt-6">
+                <div className="flex items-center gap-3">
+                  <div
+                    className="w-10 h-10 rounded-xl flex items-center justify-center"
+                    style={{ backgroundColor: "rgba(34, 197, 94, 0.08)" }}
+                  >
+                    <Zap className="w-5 h-5" style={{ color: "#22c55e" }} />
+                  </div>
+                  <div>
+                    <CardTitle className="text-lg font-semibold">Chatbot Credits Usage</CardTitle>
+                    <p className="text-sm text-muted-foreground mt-0.5">Credits consumed with burn rate analysis</p>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="px-6 pb-6">
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="p-3 rounded-xl bg-muted/50 border border-border/50">
+                      <p className="text-xs text-muted-foreground mb-1">Credits Used</p>
+                      <p className="text-xl font-bold text-foreground">
+                        {usageData.chatbot.creditsUsed.toLocaleString()}
+                      </p>
+                    </div>
+                    <div className="p-3 rounded-xl bg-muted/50 border border-border/50">
+                      <p className="text-xs text-muted-foreground mb-1">Daily Burn Rate</p>
+                      <p className="text-xl font-bold text-foreground">
+                        {(usageData.chatbot.creditsUsed / 30).toFixed(0)}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="h-3 bg-muted rounded-full overflow-hidden">
+                    <div
+                      className="h-full rounded-full transition-all duration-500"
+                      style={{
+                        width: `${(usageData.chatbot.creditsUsed / usageData.chatbot.creditsTotal) * 100}%`,
+                        backgroundColor: "#22c55e",
+                      }}
+                    />
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Total allocation: {usageData.chatbot.creditsTotal.toLocaleString()} credits
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </div>
 
         {/* Reset Timer and Quick Actions */}
