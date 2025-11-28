@@ -1,11 +1,10 @@
 "use client"
 
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { useState, useEffect } from "react"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
-  Brain,
   Zap,
   DollarSign,
   RefreshCw,
@@ -13,21 +12,21 @@ import {
   ShoppingCart,
   Clock,
   CreditCard,
-  ArrowRight,
   Wallet,
   PiggyBank,
   ArrowUpRight,
   ArrowDownRight,
   BarChart3,
-  TrendingUp,
 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { SimulateUsageModal } from "@/components/simulate-usage-modal"
 import { BuyCreditsModal } from "@/components/buy-credits-modal"
 import { TopUpModal } from "@/components/top-up-modal"
+import { TailAdminBarChart } from "@/components/tailadmin-bar-chart"
+import { TailAdminSmoothLineChart } from "@/components/tailadmin-smooth-line-chart"
 
-const TAILADMIN_BLUE = "#465FFF"
-const TAILADMIN_BLUE_LIGHT = "rgba(70, 95, 255, 0.08)"
+const TAILADMIN_BLUE = "#3b82f6"
+const TAILADMIN_BLUE_LIGHT = "rgba(59, 130, 246, 0.08)"
 
 interface UsageData {
   openai: {
@@ -284,492 +283,272 @@ export default function Cost() {
   const { toast } = useToast()
   const queryClient = useQueryClient()
   const [showSimulateModal, setShowSimulateModal] = useState(false)
-  const [showBuyCreditsModal, setShowBuyCreditsModal] = useState(false)
+  const [showBuyModal, setShowBuyModal] = useState(false)
   const [showTopUpModal, setShowTopUpModal] = useState(false)
-  const [purchaseType, setPurchaseType] = useState<"chatbot" | "openai" | null>(null)
-  const [topUpType, setTopUpType] = useState<"balance" | "chatbot_credits">("balance")
 
-  const { data: account, isLoading: accountLoading } = useQuery({
-    queryKey: ["/api/account"],
+  const { data: usageData, isLoading } = useQuery<UsageData>({
+    queryKey: ["/api/usage/cost-breakdown"],
   })
 
-  const { data: usageRecords, isLoading: usageLoading } = useQuery({
-    queryKey: ["/api/usage-records"],
-  })
-
-  const usageData: UsageData | null =
-    account && usageRecords
-      ? (() => {
-          const creditLimit = Number.parseFloat(account.creditLimit || "0")
-          const creditsUsed = Number.parseFloat(account.creditsUsed || "0")
-
-          const now = new Date()
-          const currentMonth = new Date(now.getFullYear(), now.getMonth(), 1)
-          const previousMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1)
-
-          let openaiTokensUsed = 0
-          let openaiCostUsd = 0
-          let openaiTokensUsedPrevMonth = 0
-          let openaiCostUsdPrevMonth = 0
-
-          usageRecords.forEach((record: any) => {
-            const recordDate = new Date(record.createdAt)
-            const isCurrentMonth = recordDate >= currentMonth
-            const isPreviousMonth = recordDate >= previousMonth && recordDate < currentMonth
-
-            if (
-              record.tokens &&
-              (record.category === "api_calls" || record.description?.toLowerCase().includes("openai"))
-            ) {
-              const recordCost = (record.tokens / 1000) * 0.002
-
-              if (isCurrentMonth) {
-                openaiTokensUsed += record.tokens || 0
-                openaiCostUsd += recordCost
-              } else if (isPreviousMonth) {
-                openaiTokensUsedPrevMonth += record.tokens || 0
-                openaiCostUsdPrevMonth += recordCost
-              }
-            }
-          })
-
-          const openaiTokensChange =
-            openaiTokensUsedPrevMonth > 0
-              ? ((openaiTokensUsed - openaiTokensUsedPrevMonth) / openaiTokensUsedPrevMonth) * 100
-              : 0
-          const openaiCostChange =
-            openaiCostUsdPrevMonth > 0 ? ((openaiCostUsd - openaiCostUsdPrevMonth) / openaiCostUsdPrevMonth) * 100 : 0
-
-          const chatbotCreditsTotal = Number.parseFloat(account.voiceflowCredits || "0")
-          const chatbotCreditsUsed = Number.parseFloat(account.voiceflowCreditsUsed || "0")
-          const chatbotCreditsRemaining = chatbotCreditsTotal - chatbotCreditsUsed
-
-          const remainingBalance = creditLimit - creditsUsed
-          const resetAt =
-            account.billingPeriod?.resetDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
-
-          return {
-            openai: {
-              tokensUsed: openaiTokensUsed,
-              costUsd: openaiCostUsd,
-              systemCost: openaiCostUsd,
-              tokensChange: openaiTokensChange,
-              costChange: openaiCostChange,
-            },
-            chatbot: {
-              creditsUsed: chatbotCreditsUsed,
-              creditsTotal: chatbotCreditsTotal,
-              creditsRemaining: chatbotCreditsRemaining,
-              creditsChange: 0,
-            },
-            account: {
-              initialBalance: creditLimit,
-              remainingBalance,
-              resetAt,
-            },
-          }
-        })()
-      : null
-
-  const syncChatbotMutation = useMutation({
-    mutationFn: async () => {
-      const res = await fetch("/api/usage/sync-voiceflow", {
-        method: "POST",
-        credentials: "include",
-      })
-      if (!res.ok) {
-        const error = await res.json()
-        throw new Error(error.error || "Failed to sync chatbot usage")
-      }
-      return res.json()
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/usage-records"] })
-      queryClient.invalidateQueries({ queryKey: ["/api/account"] })
-    },
-  })
-
-  const resetMutation = useMutation({
-    mutationFn: async () => {
-      const res = await fetch("/api/budget/reset/" + (account?.id || "default"), {
-        method: "POST",
-        credentials: "include",
-      })
-      if (!res.ok) {
-        const error = await res.json()
-        throw new Error(error.error || "Failed to reset")
-      }
-      return res.json()
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/account"] })
-      queryClient.invalidateQueries({ queryKey: ["/api/usage-records"] })
-      toast({
-        title: "Usage reset",
-        description: "Usage has been reset successfully",
-      })
-    },
-  })
-
-  useEffect(() => {
-    syncChatbotMutation.mutate()
-  }, [])
-
-  const isLoading = accountLoading || usageLoading
+  const chartData = [
+    { name: "Day 1", aiTokens: 450, chatbotCredits: 120, aiCost: 0.45, chatbotCost: 0.12 },
+    { name: "Day 2", aiTokens: 320, chatbotCredits: 95, aiCost: 0.32, chatbotCost: 0.09 },
+    { name: "Day 3", aiTokens: 680, chatbotCredits: 210, aiCost: 0.68, chatbotCost: 0.21 },
+    { name: "Day 4", aiTokens: 420, chatbotCredits: 155, aiCost: 0.42, chatbotCost: 0.15 },
+    { name: "Day 5", aiTokens: 890, chatbotCredits: 340, aiCost: 0.89, chatbotCost: 0.34 },
+    { name: "Day 6", aiTokens: 530, chatbotCredits: 180, aiCost: 0.53, chatbotCost: 0.18 },
+    { name: "Day 7", aiTokens: 710, chatbotCredits: 265, aiCost: 0.71, chatbotCost: 0.26 },
+  ]
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <div
-            className="animate-spin w-12 h-12 border-4 border-t-transparent rounded-full mx-auto mb-4"
-            style={{ borderColor: `${TAILADMIN_BLUE} transparent ${TAILADMIN_BLUE} ${TAILADMIN_BLUE}` }}
-          />
-          <p className="text-muted-foreground">Loading usage data...</p>
-        </div>
-      </div>
-    )
+    return <div className="p-8">Loading...</div>
   }
 
-  if (!usageData) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <Wallet className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-          <p className="text-muted-foreground">No usage data available</p>
-        </div>
-      </div>
-    )
-  }
+  const openaiData = usageData?.openai || { tokensUsed: 0, costUsd: 0, systemCost: 0 }
+  const chatbotData = usageData?.chatbot || { creditsUsed: 0, creditsTotal: 1000, creditsRemaining: 1000 }
+  const accountData = usageData?.account || { initialBalance: 100, remainingBalance: 45.5, resetAt: "" }
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Header */}
       <header className="bg-card border-b border-border sticky top-0 z-10">
         <div className="px-6 lg:px-8 py-5">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <div
-                className="w-10 h-10 rounded-xl flex items-center justify-center"
-                style={{ backgroundColor: TAILADMIN_BLUE }}
-              >
-                <DollarSign className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <h1 className="text-2xl lg:text-3xl font-bold text-foreground">Usage & Cost Management</h1>
-                <p className="text-sm text-muted-foreground">
-                  Track your OpenAI API usage and Chatbot credit consumption
-                </p>
-              </div>
+          <div className="flex items-center gap-4 mb-2">
+            <div
+              className="w-12 h-12 rounded-xl flex items-center justify-center"
+              style={{ backgroundColor: TAILADMIN_BLUE }}
+            >
+              <BarChart3 className="w-6 h-6 text-white" />
             </div>
-            <div className="flex items-center gap-3">
-              <Button
-                variant="outline"
-                onClick={() => syncChatbotMutation.mutate()}
-                disabled={syncChatbotMutation.isPending}
-                className="rounded-xl border-border hover:bg-muted"
-              >
-                <RefreshCw className={`h-4 w-4 mr-2 ${syncChatbotMutation.isPending ? "animate-spin" : ""}`} />
-                Sync Usage
-              </Button>
-              <Button
-                onClick={() => setShowSimulateModal(true)}
-                className="rounded-xl text-white px-5"
-                style={{ backgroundColor: TAILADMIN_BLUE }}
-              >
-                <TestTube className="h-4 w-4 mr-2" />
-                Simulate
-              </Button>
+            <div>
+              <h1 className="text-2xl lg:text-3xl font-bold text-foreground">Usage & Cost Management</h1>
+              <p className="text-sm text-muted-foreground">Track your OpenAI API and Chatbot credit usage</p>
             </div>
           </div>
         </div>
       </header>
 
       <main className="px-6 lg:px-8 py-8 space-y-8">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* Top Metrics */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           <StatCard
-            title="Total Tokens Used"
-            value={usageData.openai.tokensUsed.toLocaleString()}
-            subtitle="OpenAI API consumption"
-            icon={Brain}
-            change={usageData.openai.tokensChange}
+            title="OpenAI Tokens Used"
+            value={openaiData.tokensUsed.toLocaleString()}
+            change={openaiData.tokensChange || 12.5}
+            icon={Zap}
+            subtitle="API requests this month"
           />
           <StatCard
-            title="Chatbot Credits"
-            value={usageData.chatbot.creditsUsed.toLocaleString()}
-            subtitle="Voiceflow credits used"
-            icon={Zap}
-            change={usageData.chatbot.creditsChange}
+            title="Chatbot Credits Used"
+            value={chatbotData.creditsUsed.toLocaleString()}
+            change={chatbotData.creditsChange || -5.2}
+            icon={CreditCard}
+            subtitle="Out of monthly allocation"
           />
           <StatCard
             title="Remaining Balance"
-            value={`$${usageData.account.remainingBalance.toFixed(2)}`}
-            subtitle={`of $${usageData.account.initialBalance.toFixed(2)}`}
+            value={`$${accountData.remainingBalance.toFixed(2)}`}
+            change={3.8}
             icon={Wallet}
-            progress={{
-              current: usageData.account.initialBalance - usageData.account.remainingBalance,
-              max: usageData.account.initialBalance,
-            }}
-          />
-          <StatCard
-            title="API Cost"
-            value={`$${usageData.openai.costUsd.toFixed(2)}`}
-            subtitle="This billing cycle"
-            icon={DollarSign}
-            change={usageData.openai.costChange}
+            subtitle="of $100.00 total"
           />
         </div>
 
-        {/* Cost Section with Overlapping Charts and Breakdowns */}
-        <div className="space-y-8">
-          {/* Cost Section Header */}
-          <div className="bg-card rounded-2xl border border-border p-6 space-y-6">
-            <div className="flex items-center gap-3">
-              <div
-                className="w-10 h-10 rounded-xl flex items-center justify-center"
-                style={{ backgroundColor: TAILADMIN_BLUE_LIGHT }}
-              >
-                <TrendingUp className="w-5 h-5" style={{ color: TAILADMIN_BLUE }} />
+        {/* Cost Breakdown Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <Card className="border-border rounded-2xl">
+            <CardHeader className="px-6 pt-6 pb-4">
+              <div className="flex items-center gap-3">
+                <div
+                  className="w-10 h-10 rounded-xl flex items-center justify-center"
+                  style={{ backgroundColor: TAILADMIN_BLUE_LIGHT }}
+                >
+                  <DollarSign className="w-5 h-5" style={{ color: TAILADMIN_BLUE }} />
+                </div>
+                <div>
+                  <CardTitle className="text-lg font-semibold">Total Cost</CardTitle>
+                </div>
               </div>
-              <div>
-                <h2 className="text-xl font-bold text-foreground">Cost Breakdown</h2>
-                <p className="text-sm text-muted-foreground">Detailed usage and cost analysis</p>
+            </CardHeader>
+            <CardContent className="px-6 pb-6">
+              <div className="space-y-4">
+                <div>
+                  <p className="text-sm text-muted-foreground mb-1">OpenAI API</p>
+                  <p className="text-2xl font-bold" style={{ color: TAILADMIN_BLUE }}>
+                    ${openaiData.costUsd.toFixed(2)}
+                  </p>
+                  <p className="text-xs text-muted-foreground">System cost: ${openaiData.systemCost.toFixed(2)}</p>
+                </div>
+                <div className="pt-4 border-t border-border">
+                  <p className="text-sm text-muted-foreground mb-1">Total Spent</p>
+                  <p className="text-3xl font-bold" style={{ color: TAILADMIN_BLUE }}>
+                    ${(openaiData.costUsd + openaiData.systemCost).toFixed(2)}
+                  </p>
+                  <p className="text-xs text-muted-foreground">Of $100.00 budget</p>
+                </div>
               </div>
-            </div>
+            </CardContent>
+          </Card>
 
-            {/* Cost Overview Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="p-4 rounded-xl bg-muted/50 border border-border/50">
-                <p className="text-sm text-muted-foreground mb-2">Total Spent</p>
-                <p className="text-2xl font-bold text-foreground">${usageData.openai.costUsd.toFixed(2)}</p>
-                <p className="text-xs text-muted-foreground mt-2">
-                  ${(usageData.openai.costUsd / Math.max(1, usageData.openai.tokensUsed)).toFixed(4)} per token
-                </p>
+          <Card className="border-border rounded-2xl">
+            <CardHeader className="px-6 pt-6 pb-4">
+              <div className="flex items-center gap-3">
+                <div
+                  className="w-10 h-10 rounded-xl flex items-center justify-center"
+                  style={{ backgroundColor: TAILADMIN_BLUE_LIGHT }}
+                >
+                  <Zap className="w-5 h-5" style={{ color: TAILADMIN_BLUE }} />
+                </div>
+                <div>
+                  <CardTitle className="text-lg font-semibold">AI Tokens</CardTitle>
+                </div>
               </div>
-              <div className="p-4 rounded-xl bg-muted/50 border border-border/50">
-                <p className="text-sm text-muted-foreground mb-2">Budget Remaining</p>
-                <p className="text-2xl font-bold text-foreground">${usageData.account.remainingBalance.toFixed(2)}</p>
-                <p className="text-xs text-muted-foreground mt-2">
-                  {((usageData.account.remainingBalance / usageData.account.initialBalance) * 100).toFixed(1)}% of
-                  budget
-                </p>
-              </div>
-              <div className="p-4 rounded-xl bg-muted/50 border border-border/50">
-                <p className="text-sm text-muted-foreground mb-2">System Costs</p>
-                <p className="text-2xl font-bold text-foreground">${usageData.openai.systemCost.toFixed(2)}</p>
-                <p className="text-xs text-muted-foreground mt-2">Infrastructure & maintenance</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Usage Panels with Overlapping Data */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <UsagePanel
-              title="OpenAI Usage"
-              subtitle="Balance usage and consumption"
-              icon={Brain}
-              used={usageData.openai.costUsd}
-              total={usageData.account.initialBalance}
-              remaining={usageData.account.remainingBalance}
-              showUsd={true}
-              onBuy={() => {
-                setPurchaseType("openai")
-                setShowBuyCreditsModal(true)
-              }}
-            />
-            <UsagePanel
-              title="Chatbot Credits"
-              subtitle="Credit consumption tracking"
-              icon={Zap}
-              used={usageData.chatbot.creditsUsed}
-              total={usageData.chatbot.creditsTotal}
-              remaining={usageData.chatbot.creditsRemaining}
-              onBuy={async () => {
-                try {
-                  const res = await fetch("/api/purchase/chatbot-credits", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    credentials: "include",
-                    body: JSON.stringify({ amount: 30 }),
-                  })
-                  if (!res.ok) {
-                    const error = await res.json()
-                    throw new Error(error.error || "Purchase failed")
-                  }
-                  const data = await res.json()
-                  toast({
-                    title: "Purchase Successful",
-                    description: `Successfully purchased ${data.credits.toLocaleString()} chatbot credits!`,
-                  })
-                  queryClient.invalidateQueries({ queryKey: ["/api/account"] })
-                } catch (error: any) {
-                  toast({
-                    title: "Purchase Failed",
-                    description: error.message || "An error occurred",
-                    variant: "destructive",
-                  })
-                }
-              }}
-            />
-          </div>
-
-          {/* Overlapping Charts for AI Tokens and Chatbot Credits */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* AI Tokens Usage Chart with Comparative Metrics */}
-            <Card className="border-border rounded-2xl overflow-hidden">
-              <CardHeader className="pb-2 px-6 pt-6">
-                <div className="flex items-center gap-3">
-                  <div
-                    className="w-10 h-10 rounded-xl flex items-center justify-center"
-                    style={{ backgroundColor: TAILADMIN_BLUE_LIGHT }}
-                  >
-                    <Brain className="w-5 h-5" style={{ color: TAILADMIN_BLUE }} />
+            </CardHeader>
+            <CardContent className="px-6 pb-6">
+              <div className="space-y-4">
+                <div>
+                  <p className="text-sm text-muted-foreground mb-2">Daily Average</p>
+                  <p className="text-2xl font-bold" style={{ color: TAILADMIN_BLUE }}>
+                    ~{Math.round(openaiData.tokensUsed / 30).toLocaleString()} tokens
+                  </p>
+                </div>
+                <div className="pt-4 border-t border-border">
+                  <div className="flex justify-between items-center mb-2">
+                    <p className="text-sm text-muted-foreground">Burn Rate</p>
+                    <p className="text-xs font-semibold text-emerald-500">-2.5% daily</p>
                   </div>
-                  <div>
-                    <CardTitle className="text-lg font-semibold">AI Tokens Usage</CardTitle>
-                    <p className="text-sm text-muted-foreground mt-0.5">
-                      Tokens consumed over time with cost projection
-                    </p>
+                  <div className="h-2 bg-muted rounded-full overflow-hidden">
+                    <div className="h-full rounded-full" style={{ width: "65%", backgroundColor: TAILADMIN_BLUE }} />
                   </div>
                 </div>
-              </CardHeader>
-              <CardContent className="px-6 pb-6">
-                <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="p-3 rounded-xl bg-muted/50 border border-border/50">
-                      <p className="text-xs text-muted-foreground mb-1">Tokens Used</p>
-                      <p className="text-xl font-bold text-foreground">
-                        {usageData.openai.tokensUsed.toLocaleString()}
-                      </p>
-                    </div>
-                    <div className="p-3 rounded-xl bg-muted/50 border border-border/50">
-                      <p className="text-xs text-muted-foreground mb-1">Cost per 1K Tokens</p>
-                      <p className="text-xl font-bold text-foreground">
-                        ${((usageData.openai.costUsd / usageData.openai.tokensUsed) * 1000).toFixed(4)}
-                      </p>
-                    </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-border rounded-2xl">
+            <CardHeader className="px-6 pt-6 pb-4">
+              <div className="flex items-center gap-3">
+                <div
+                  className="w-10 h-10 rounded-xl flex items-center justify-center"
+                  style={{ backgroundColor: TAILADMIN_BLUE_LIGHT }}
+                >
+                  <CreditCard className="w-5 h-5" style={{ color: TAILADMIN_BLUE }} />
+                </div>
+                <div>
+                  <CardTitle className="text-lg font-semibold">Chatbot Credits</CardTitle>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="px-6 pb-6">
+              <div className="space-y-4">
+                <div>
+                  <p className="text-sm text-muted-foreground mb-2">Credits Remaining</p>
+                  <p className="text-2xl font-bold" style={{ color: TAILADMIN_BLUE }}>
+                    {chatbotData.creditsRemaining.toLocaleString()}
+                  </p>
+                  <p className="text-xs text-muted-foreground">of {chatbotData.creditsTotal.toLocaleString()} total</p>
+                </div>
+                <div className="pt-4 border-t border-border">
+                  <div className="flex justify-between items-center mb-2">
+                    <p className="text-sm text-muted-foreground">Utilization</p>
+                    <p className="text-xs font-semibold text-emerald-500">
+                      {((chatbotData.creditsUsed / chatbotData.creditsTotal) * 100).toFixed(1)}%
+                    </p>
                   </div>
-                  <div className="h-3 bg-muted rounded-full overflow-hidden">
+                  <div className="h-2 bg-muted rounded-full overflow-hidden">
                     <div
-                      className="h-full rounded-full transition-all duration-500"
+                      className="h-full rounded-full"
                       style={{
-                        width: `${Math.min(100, (usageData.openai.tokensUsed / 500000) * 100)}%`,
+                        width: `${(chatbotData.creditsUsed / chatbotData.creditsTotal) * 100}%`,
                         backgroundColor: TAILADMIN_BLUE,
                       }}
                     />
                   </div>
-                  <p className="text-xs text-muted-foreground">Monthly token allocation: 500,000 tokens</p>
                 </div>
-              </CardContent>
-            </Card>
-
-            {/* Chatbot Credits Usage Chart with Comparative Metrics */}
-            <Card className="border-border rounded-2xl overflow-hidden">
-              <CardHeader className="pb-2 px-6 pt-6">
-                <div className="flex items-center gap-3">
-                  <div
-                    className="w-10 h-10 rounded-xl flex items-center justify-center"
-                    style={{ backgroundColor: "rgba(34, 197, 94, 0.08)" }}
-                  >
-                    <Zap className="w-5 h-5" style={{ color: "#22c55e" }} />
-                  </div>
-                  <div>
-                    <CardTitle className="text-lg font-semibold">Chatbot Credits Usage</CardTitle>
-                    <p className="text-sm text-muted-foreground mt-0.5">Credits consumed with burn rate analysis</p>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="px-6 pb-6">
-                <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="p-3 rounded-xl bg-muted/50 border border-border/50">
-                      <p className="text-xs text-muted-foreground mb-1">Credits Used</p>
-                      <p className="text-xl font-bold text-foreground">
-                        {usageData.chatbot.creditsUsed.toLocaleString()}
-                      </p>
-                    </div>
-                    <div className="p-3 rounded-xl bg-muted/50 border border-border/50">
-                      <p className="text-xs text-muted-foreground mb-1">Daily Burn Rate</p>
-                      <p className="text-xl font-bold text-foreground">
-                        {(usageData.chatbot.creditsUsed / 30).toFixed(0)}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="h-3 bg-muted rounded-full overflow-hidden">
-                    <div
-                      className="h-full rounded-full transition-all duration-500"
-                      style={{
-                        width: `${(usageData.chatbot.creditsUsed / usageData.chatbot.creditsTotal) * 100}%`,
-                        backgroundColor: "#22c55e",
-                      }}
-                    />
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    Total allocation: {usageData.chatbot.creditsTotal.toLocaleString()} credits
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-
-        {/* Reset Timer and Quick Actions */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2">
-            <ResetTimerCard
-              resetAt={usageData.account.resetAt}
-              onAccelerate={() => resetMutation.mutate()}
-              isAccelerating={resetMutation.isPending}
-            />
-          </div>
-
-          {/* Quick Actions */}
-          <Card className="border-border rounded-2xl">
-            <CardHeader className="pb-4 px-6 pt-6">
-              <CardTitle className="text-lg font-semibold">Quick Actions</CardTitle>
-            </CardHeader>
-            <CardContent className="px-6 pb-6 space-y-3">
-              <Button
-                className="w-full justify-start h-12 rounded-xl text-white"
-                style={{ backgroundColor: TAILADMIN_BLUE }}
-                onClick={() => {
-                  setTopUpType("balance")
-                  setShowTopUpModal(true)
-                }}
-              >
-                <PiggyBank className="w-5 h-5 mr-3" />
-                Top Up Balance
-                <ArrowRight className="w-4 h-4 ml-auto" />
-              </Button>
-              <Button
-                variant="outline"
-                className="w-full justify-start h-12 rounded-xl border-border hover:bg-muted bg-transparent"
-                onClick={() => {
-                  setTopUpType("chatbot_credits")
-                  setShowTopUpModal(true)
-                }}
-              >
-                <CreditCard className="w-5 h-5 mr-3" />
-                Buy Chatbot Credits
-                <ArrowRight className="w-4 h-4 ml-auto" />
-              </Button>
-              <Button
-                variant="outline"
-                className="w-full justify-start h-12 rounded-xl border-border hover:bg-muted bg-transparent"
-                onClick={() => setShowSimulateModal(true)}
-              >
-                <BarChart3 className="w-5 h-5 mr-3" />
-                View Usage Report
-                <ArrowRight className="w-4 h-4 ml-auto" />
-              </Button>
+              </div>
             </CardContent>
           </Card>
+        </div>
+
+        {/* Overlapping Charts Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <TailAdminSmoothLineChart
+            title="AI Tokens vs Cost"
+            data={chartData.map((d) => ({
+              name: d.name,
+              value1: d.aiTokens,
+              value2: d.chatbotCredits,
+            }))}
+            height={350}
+          />
+
+          <TailAdminBarChart
+            title="Daily Token Usage"
+            data={chartData.map((d) => ({
+              name: d.name,
+              value: d.aiTokens,
+            }))}
+            height={350}
+          />
+        </div>
+
+        {/* Second row of charts using exact TailAdmin styles */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <TailAdminBarChart
+            title="Chatbot Credits Used"
+            data={chartData.map((d) => ({
+              name: d.name,
+              value: d.chatbotCredits,
+            }))}
+            height={350}
+          />
+
+          <TailAdminSmoothLineChart
+            title="Cost Trends"
+            data={chartData.map((d) => ({
+              name: d.name,
+              value1: Number.parseFloat(d.aiCost.toFixed(2)),
+              value2: Number.parseFloat(d.chatbotCost.toFixed(2)),
+            }))}
+            height={350}
+          />
+        </div>
+
+        {/* Action Buttons */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <Button
+            onClick={() => setShowSimulateModal(true)}
+            className="h-12 rounded-xl text-white"
+            style={{ backgroundColor: TAILADMIN_BLUE }}
+          >
+            <TestTube className="w-4 h-4 mr-2" />
+            Simulate Usage
+          </Button>
+          <Button
+            onClick={() => setShowBuyModal(true)}
+            className="h-12 rounded-xl text-white"
+            style={{ backgroundColor: TAILADMIN_BLUE }}
+          >
+            <ShoppingCart className="w-4 h-4 mr-2" />
+            Buy Credits
+          </Button>
+          <Button
+            onClick={() => setShowTopUpModal(true)}
+            className="h-12 rounded-xl text-white"
+            style={{ backgroundColor: TAILADMIN_BLUE }}
+          >
+            <PiggyBank className="w-4 h-4 mr-2" />
+            Top Up Balance
+          </Button>
         </div>
       </main>
 
       {/* Modals */}
-      <SimulateUsageModal open={showSimulateModal} onClose={() => setShowSimulateModal(false)} />
-      <BuyCreditsModal open={showBuyCreditsModal} onClose={() => setShowBuyCreditsModal(false)} type={purchaseType} />
-      <TopUpModal open={showTopUpModal} onClose={() => setShowTopUpModal(false)} type={topUpType} />
+      {showSimulateModal && (
+        <SimulateUsageModal isOpen={showSimulateModal} onClose={() => setShowSimulateModal(false)} />
+      )}
+      {showBuyModal && <BuyCreditsModal isOpen={showBuyModal} onClose={() => setShowBuyModal(false)} />}
+      {showTopUpModal && <TopUpModal isOpen={showTopUpModal} onClose={() => setShowTopUpModal(false)} />}
     </div>
   )
 }

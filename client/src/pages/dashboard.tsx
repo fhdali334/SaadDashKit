@@ -6,8 +6,6 @@ import {
   CreditCard,
   MessageSquare,
   FileText,
-  Plus,
-  Minus,
   BarChart3,
   TrendingUp,
   TrendingDown,
@@ -16,22 +14,20 @@ import {
   Globe,
   Users,
   MapPin,
-  ArrowUpRight,
-  ArrowDownRight,
 } from "lucide-react"
 import type { UsageStats } from "@shared/schema"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { useState } from "react"
 import { useToast } from "@/hooks/use-toast"
 import { apiRequest, queryClient } from "@/lib/queryClient"
-import { CircularProgress } from "@/components/circular-progress"
 import { Skeleton } from "@/components/ui/skeleton"
 import { WorldMapHero } from "@/components/world-map-hero"
-import { TailAdminLineChart } from "@/components/tailadmin-line-chart"
+import { TailAdminSmoothLineChart } from "@/components/tailadmin-smooth-line-chart"
+import { TailAdminBarChart } from "@/components/tailadmin-bar-chart"
+import { TailAdminSemicircleChart } from "@/components/tailadmin-semicircle-chart"
 
-const TAILADMIN_BLUE = "#465FFF"
-const TAILADMIN_BLUE_LIGHT = "rgba(70, 95, 255, 0.08)"
+const TAILADMIN_BLUE = "#3b82f6"
+const TAILADMIN_BLUE_LIGHT = "rgba(59, 130, 246, 0.08)"
 
 function StatCard({
   title,
@@ -47,35 +43,28 @@ function StatCard({
   subtitle?: string
 }) {
   const isPositive = change !== undefined && change >= 0
+  const changeColor = isPositive ? "text-emerald-500" : "text-red-500"
+  const changeBgColor = isPositive ? "bg-emerald-500/10" : "bg-red-500/10"
 
   return (
-    <div className="bg-card rounded-2xl border border-border p-6 hover:shadow-lg transition-all duration-300">
-      <div className="flex items-start justify-between">
-        <div className="flex-1">
-          <div className="flex items-center gap-2 mb-3">
-            <div
-              className="w-10 h-10 rounded-xl flex items-center justify-center"
-              style={{ backgroundColor: TAILADMIN_BLUE_LIGHT }}
-            >
-              <Icon className="w-5 h-5" style={{ color: TAILADMIN_BLUE }} />
-            </div>
-          </div>
-          <p className="text-sm font-medium text-muted-foreground mb-1">{title}</p>
-          <h3 className="text-2xl lg:text-3xl font-bold text-foreground">{value}</h3>
-          {subtitle && <p className="text-xs text-muted-foreground mt-1">{subtitle}</p>}
+    <div className="bg-card rounded-2xl border border-border p-6 hover:shadow-md transition-shadow">
+      <div className="flex items-start justify-between mb-4">
+        <div
+          className="w-10 h-10 rounded-lg flex items-center justify-center"
+          style={{ backgroundColor: TAILADMIN_BLUE_LIGHT }}
+        >
+          <Icon className="w-5 h-5" style={{ color: TAILADMIN_BLUE }} />
         </div>
         {change !== undefined && (
-          <div
-            className={`flex items-center gap-1 px-2.5 py-1.5 rounded-full text-xs font-semibold ${
-              isPositive ? "bg-emerald-500/10 text-emerald-500" : "bg-red-500/10 text-red-500"
-            }`}
-          >
-            {isPositive ? <ArrowUpRight className="w-3.5 h-3.5" /> : <ArrowDownRight className="w-3.5 h-3.5" />}
+          <div className={`text-xs font-semibold px-2.5 py-1 rounded-full ${changeBgColor} ${changeColor}`}>
             {isPositive ? "+" : ""}
-            {change.toFixed(2)}%
+            {change}%
           </div>
         )}
       </div>
+      <p className="text-sm text-muted-foreground mb-1">{title}</p>
+      <p className="text-2xl lg:text-3xl font-bold text-foreground mb-3">{value}</p>
+      <p className="text-xs text-muted-foreground">{subtitle}</p>
     </div>
   )
 }
@@ -91,11 +80,12 @@ function GeographicCard({
   users: string
   percentage: number
   change: number
-  flag?: string
+  flag: string
 }) {
   const isPositive = change >= 0
+
   return (
-    <div className="flex items-center gap-4 py-4 border-b border-border/50 last:border-0">
+    <div className="py-3 flex items-center gap-3 border-b border-border/50 last:border-0">
       <div className="flex items-center gap-3 flex-1 min-w-0">
         {flag && <span className="text-xl">{flag}</span>}
         <div className="flex-1 min-w-0">
@@ -263,6 +253,7 @@ export default function Dashboard() {
       </header>
 
       <main className="px-6 lg:px-8 py-8 space-y-8">
+        {/* Top Metrics Cards ABOVE the map */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           <StatCard
             title="Total Usage"
@@ -294,30 +285,30 @@ export default function Dashboard() {
           />
         </div>
 
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-          {/* Map - takes 2 columns */}
-          <div className="xl:col-span-2 bg-card rounded-2xl border border-border overflow-hidden">
-            <div className="px-6 py-5 border-b border-border">
-              <div className="flex items-center gap-3">
-                <div
-                  className="w-10 h-10 rounded-xl flex items-center justify-center"
-                  style={{ backgroundColor: TAILADMIN_BLUE_LIGHT }}
-                >
-                  <Globe className="w-5 h-5" style={{ color: TAILADMIN_BLUE }} />
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-foreground">Global Distribution</h3>
-                  <p className="text-sm text-muted-foreground">User activity by region</p>
-                </div>
+        {/* Map as first major section */}
+        <div className="bg-card rounded-2xl border border-border overflow-hidden">
+          <div className="px-6 py-5 border-b border-border">
+            <div className="flex items-center gap-3">
+              <div
+                className="w-10 h-10 rounded-xl flex items-center justify-center"
+                style={{ backgroundColor: TAILADMIN_BLUE_LIGHT }}
+              >
+                <Globe className="w-5 h-5" style={{ color: TAILADMIN_BLUE }} />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-foreground">Global Distribution</h3>
+                <p className="text-sm text-muted-foreground">Real-time user activity by region</p>
               </div>
             </div>
-            <div className="p-6">
-              <WorldMapHero />
-            </div>
           </div>
+          <div className="p-6 bg-gradient-to-b from-muted/30 to-background" style={{ minHeight: "500px" }}>
+            <WorldMapHero />
+          </div>
+        </div>
 
-          {/* Regional Stats */}
-          <div className="bg-card rounded-2xl border border-border">
+        {/* Geographic metrics below map */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 bg-card rounded-2xl border border-border">
             <div className="px-6 py-5 border-b border-border">
               <div className="flex items-center gap-3">
                 <div
@@ -328,7 +319,7 @@ export default function Dashboard() {
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-foreground">Regional Metrics</h3>
-                  <p className="text-sm text-muted-foreground">Usage by geography</p>
+                  <p className="text-sm text-muted-foreground">Detailed usage by geography</p>
                 </div>
               </div>
             </div>
@@ -338,157 +329,72 @@ export default function Dashboard() {
               <GeographicCard region="Germany" users="3,891" percentage={18} change={-3.1} flag="🇩🇪" />
               <GeographicCard region="Canada" users="2,456" percentage={12} change={15.4} flag="🇨🇦" />
               <GeographicCard region="Australia" users="1,823" percentage={8} change={6.7} flag="🇦🇺" />
-
-              {/* Quick summary */}
-              <div className="mt-6 pt-6 border-t border-border">
-                <div className="grid grid-cols-3 gap-3">
-                  <QuickStatItem label="Countries" value="24" trend="up" />
-                  <QuickStatItem label="Cities" value="156" trend="up" />
-                  <QuickStatItem label="Growth" value="+18%" trend="up" />
-                </div>
-              </div>
             </div>
+          </div>
+
+          <div className="bg-card rounded-2xl border border-border overflow-hidden">
+            <TailAdminSemicircleChart successRate={successRate} />
           </div>
         </div>
 
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-          {/* Line Chart */}
-          <div className="xl:col-span-2">
-            {history.length > 0 && (
-              <TailAdminLineChart
-                title="Usage Statistics"
-                subtitle="API requests over the selected period"
-                labels={chartLabels}
-                data={chartData}
-                dataLabel="Requests"
-                height={380}
-                icon={<BarChart3 className="w-5 h-5" style={{ color: TAILADMIN_BLUE }} />}
-              />
-            )}
-          </div>
-
-          {/* Monthly Target */}
-          <div className="xl:col-span-1">
-            <CircularProgress
-              value={spent}
-              max={budget}
-              title="Monthly Target"
-              subtitle="Budget utilization"
-              message="Your credit usage is within safe limits."
-              className="h-full"
+        {/* Overlapping GTM-style charts */}
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 ">
+          {history.length > 0 && (
+            <TailAdminSmoothLineChart
+              title="Request Performance Metrics"
+              data={history.map((d: any) => ({
+                name: new Date(d.date).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+                value1: d.totalRequests,
+                value2: d.successfulRequests,
+              }))}
+              height={350}
             />
-          </div>
+          )}
+
+          {history.length > 0 && (
+            <TailAdminBarChart
+              title="Daily Request Volume"
+              data={history.map((d: any) => ({
+                name: new Date(d.date).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+                value: d.totalRequests,
+              }))}
+              height={350}
+            />
+          )}
         </div>
 
-        <div className="bg-card rounded-2xl border border-border p-6">
-          <div className="flex items-center gap-3 mb-6">
-            <div
-              className="w-10 h-10 rounded-xl flex items-center justify-center"
-              style={{ backgroundColor: TAILADMIN_BLUE_LIGHT }}
-            >
-              <Users className="w-5 h-5" style={{ color: TAILADMIN_BLUE }} />
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold text-foreground">Performance Overview</h3>
-              <p className="text-sm text-muted-foreground">Key metrics at a glance</p>
-            </div>
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            <div className="text-center p-6 rounded-2xl bg-muted/30 border border-border/50">
-              <p className="text-3xl font-bold mb-2" style={{ color: TAILADMIN_BLUE }}>
-                {successRate.toFixed(1)}%
-              </p>
-              <p className="text-sm text-muted-foreground">Success Rate</p>
-              <div className="flex items-center justify-center gap-1 mt-2 text-emerald-500 text-xs font-medium">
-                <ArrowUpRight className="w-3 h-3" />
-                +2.3%
-              </div>
-            </div>
-            <div className="text-center p-6 rounded-2xl bg-muted/30 border border-border/50">
-              <p className="text-3xl font-bold mb-2" style={{ color: TAILADMIN_BLUE }}>
-                362.7
-              </p>
-              <p className="text-sm text-muted-foreground">Avg Messages/Session</p>
-              <div className="flex items-center justify-center gap-1 mt-2 text-emerald-500 text-xs font-medium">
-                <ArrowUpRight className="w-3 h-3" />
-                +5.1%
-              </div>
-            </div>
-            <div className="text-center p-6 rounded-2xl bg-muted/30 border border-border/50">
-              <p className="text-3xl font-bold mb-2" style={{ color: TAILADMIN_BLUE }}>
-                {files}
-              </p>
-              <p className="text-sm text-muted-foreground">Storage Used (KB)</p>
-              <div className="flex items-center justify-center gap-1 mt-2 text-emerald-500 text-xs font-medium">
-                <ArrowUpRight className="w-3 h-3" />
-                +1.8%
-              </div>
-            </div>
-            <div className="text-center p-6 rounded-2xl bg-muted/30 border border-border/50">
-              <p className="text-3xl font-bold mb-2" style={{ color: TAILADMIN_BLUE }}>
-                1.2s
-              </p>
-              <p className="text-sm text-muted-foreground">Avg Response Time</p>
-              <div className="flex items-center justify-center gap-1 mt-2 text-red-500 text-xs font-medium">
-                <ArrowDownRight className="w-3 h-3" />
-                -0.3s
-              </div>
-            </div>
-          </div>
-        </div>
+        {/* Budget and summary sections */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {budgetStatus && (
+            <TailAdminSemicircleChart
+              percentage={(spent / budget) * 100}
+              change={Math.round((spent / budget) * 100) > 50 ? -5.2 : 12.3}
+              title="Monthly Budget"
+              subtitle="Usage rate and remaining balance"
+              height={300}
+            />
+          )}
 
-        {budgetStatus && (
           <div className="bg-card rounded-2xl border border-border p-6">
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
-              <div className="flex items-center gap-3">
-                <div
-                  className="w-10 h-10 rounded-xl flex items-center justify-center"
-                  style={{ backgroundColor: TAILADMIN_BLUE_LIGHT }}
-                >
-                  <CreditCard className="w-5 h-5" style={{ color: TAILADMIN_BLUE }} />
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-foreground">Manual Credit Adjustment</h3>
-                  <p className="text-sm text-muted-foreground">Add or subtract credits from your balance</p>
-                </div>
+            <div className="flex items-center gap-3 mb-6">
+              <div
+                className="w-10 h-10 rounded-xl flex items-center justify-center"
+                style={{ backgroundColor: TAILADMIN_BLUE_LIGHT }}
+              >
+                <Users className="w-5 h-5" style={{ color: TAILADMIN_BLUE }} />
               </div>
-              <div className="flex items-center gap-2 px-4 py-2 bg-muted rounded-xl">
-                <span className="text-sm text-muted-foreground">Current:</span>
-                <span className="font-semibold text-foreground">
-                  {budgetStatus.credits_used.toLocaleString()} credits
-                </span>
-                <span className="text-sm text-muted-foreground">(${budgetStatus.current_cost.toFixed(2)})</span>
+              <div>
+                <h3 className="text-lg font-semibold text-foreground">Geographic Summary</h3>
+                <p className="text-sm text-muted-foreground">Global activity snapshot</p>
               </div>
             </div>
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Input
-                type="number"
-                value={creditAmount}
-                onChange={(e) => setCreditAmount(e.target.value)}
-                className="flex-1 h-12 rounded-xl border-border bg-muted/30"
-                placeholder="Enter amount"
-              />
-              <div className="flex gap-3">
-                <Button
-                  onClick={handleAddCredits}
-                  disabled={addCreditsMutation.isPending}
-                  className="flex-1 sm:flex-none h-12 px-6 text-white rounded-xl"
-                  style={{ backgroundColor: TAILADMIN_BLUE }}
-                >
-                  <Plus className="w-4 h-4 mr-2" /> Add Credits
-                </Button>
-                <Button
-                  onClick={handleSubtractCredits}
-                  disabled={subtractCreditsMutation.isPending}
-                  variant="outline"
-                  className="flex-1 sm:flex-none h-12 px-6 rounded-xl border-border hover:bg-muted bg-transparent"
-                >
-                  <Minus className="w-4 h-4 mr-2" /> Subtract
-                </Button>
-              </div>
+            <div className="grid grid-cols-3 gap-4">
+              <QuickStatItem label="Countries" value="24" trend="up" />
+              <QuickStatItem label="Cities" value="156" trend="up" />
+              <QuickStatItem label="Growth" value="+18%" trend="up" />
             </div>
           </div>
-        )}
+        </div>
       </main>
     </div>
   )

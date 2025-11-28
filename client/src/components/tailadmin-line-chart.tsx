@@ -1,27 +1,12 @@
 "use client"
 
 import type React from "react"
+import { useState, useRef } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-  Filler,
-  TimeScale,
-} from "chart.js"
-import { Line } from "react-chartjs-2"
-import "chartjs-adapter-luxon"
+import { Area, AreaChart, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts"
 
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler, TimeScale)
-
-const TAILADMIN_BLUE = "#465FFF"
-const TAILADMIN_BLUE_GRADIENT_START = "rgba(70, 95, 255, 0.25)"
-const TAILADMIN_BLUE_GRADIENT_END = "rgba(70, 95, 255, 0.01)"
+const TAILADMIN_BLUE = "#3b82f6"
+const TAILADMIN_BLUE_LIGHT = "rgba(59, 130, 246, 0.15)"
 
 interface TailAdminLineChartProps {
   title: string
@@ -41,125 +26,23 @@ export function TailAdminLineChart({
   data,
   dataLabel = "Value",
   height = 400,
-  useTimeScale = false,
   icon,
 }: TailAdminLineChartProps) {
-  const createGradient = (ctx: CanvasRenderingContext2D, chartArea: any) => {
-    const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom)
-    gradient.addColorStop(0, TAILADMIN_BLUE_GRADIENT_START)
-    gradient.addColorStop(1, TAILADMIN_BLUE_GRADIENT_END)
-    return gradient
-  }
+  const [scale, setScale] = useState(1)
+  const chartRef = useRef<HTMLDivElement>(null)
 
-  const chartData = {
-    labels,
-    datasets: [
-      {
-        label: dataLabel,
-        data,
-        borderColor: TAILADMIN_BLUE,
-        backgroundColor: (context: any) => {
-          const { ctx, chartArea } = context.chart
-          if (!chartArea) return TAILADMIN_BLUE_GRADIENT_START
-          return createGradient(ctx, chartArea)
-        },
-        fill: true,
-        tension: 0.4,
-        borderWidth: 2.5,
-        pointRadius: 0,
-        pointHoverRadius: 6,
-        pointBackgroundColor: TAILADMIN_BLUE,
-        pointBorderColor: "#fff",
-        pointBorderWidth: 3,
-        pointHoverBackgroundColor: TAILADMIN_BLUE,
-        pointHoverBorderColor: "#fff",
-        pointHoverBorderWidth: 3,
-      },
-    ],
-  }
+  // Convert data to Recharts format
+  const chartData = labels.map((label, idx) => ({
+    name: typeof label === "string" ? label : label.toLocaleDateString(),
+    value: data[idx],
+  }))
 
-  const chartOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    interaction: {
-      mode: "index" as const,
-      intersect: false,
-    },
-    plugins: {
-      legend: {
-        display: false,
-      },
-      tooltip: {
-        backgroundColor: "#1e293b",
-        titleColor: "#f8fafc",
-        bodyColor: "#f8fafc",
-        borderColor: "#334155",
-        borderWidth: 1,
-        padding: 14,
-        cornerRadius: 10,
-        displayColors: false,
-        titleFont: {
-          size: 13,
-          weight: "600" as const,
-        },
-        bodyFont: {
-          size: 14,
-          weight: "500" as const,
-        },
-        callbacks: {
-          label: (context: any) => `${dataLabel}: ${context.parsed.y.toLocaleString()}`,
-        },
-      },
-    },
-    scales: {
-      x: {
-        ...(useTimeScale
-          ? {
-              type: "time" as const,
-              time: {
-                unit: "day" as const,
-              },
-            }
-          : {
-              type: "category" as const,
-            }),
-        grid: {
-          display: true,
-          color: "rgba(148, 163, 184, 0.08)",
-          drawBorder: false,
-        },
-        ticks: {
-          color: "#94a3b8",
-          font: {
-            size: 12,
-            weight: "500" as const,
-          },
-          padding: 8,
-        },
-        border: {
-          display: false,
-        },
-      },
-      y: {
-        beginAtZero: true,
-        grid: {
-          display: true,
-          color: "rgba(148, 163, 184, 0.08)",
-          drawBorder: false,
-        },
-        ticks: {
-          color: "#94a3b8",
-          font: {
-            size: 12,
-            weight: "500" as const,
-          },
-          padding: 12,
-        },
-        border: {
-          display: false,
-        },
-      },
-    },
+  const handleWheel = (e: React.WheelEvent) => {
+    e.preventDefault()
+    setScale((prev) => {
+      const newScale = e.deltaY > 0 ? Math.max(1, prev - 0.1) : prev + 0.1
+      return Math.min(newScale, 3)
+    })
   }
 
   return (
@@ -170,7 +53,7 @@ export function TailAdminLineChart({
             {icon && (
               <div
                 className="w-10 h-10 rounded-xl flex items-center justify-center"
-                style={{ backgroundColor: "rgba(70, 95, 255, 0.08)" }}
+                style={{ backgroundColor: "rgba(59, 130, 246, 0.08)" }}
               >
                 {icon}
               </div>
@@ -183,8 +66,48 @@ export function TailAdminLineChart({
         </div>
       </CardHeader>
       <CardContent className="px-6 pb-6">
-        <div style={{ height: `${height}px` }}>
-          <Line data={chartData} options={chartOptions} />
+        <div
+          ref={chartRef}
+          onWheel={handleWheel}
+          style={{
+            height: `${height}px`,
+            overflow: scale > 1 ? "auto" : "hidden",
+            cursor: "grab",
+          }}
+        >
+          <div style={{ transform: `scale(${scale})`, transformOrigin: "top left", transition: "transform 0.2s" }}>
+            <ResponsiveContainer width={scale > 1 ? "100%" : "100%"} height={height}>
+              <AreaChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor={TAILADMIN_BLUE} stopOpacity={0.3} />
+                    <stop offset="95%" stopColor={TAILADMIN_BLUE} stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(148, 163, 184, 0.1)" vertical={false} />
+                <XAxis dataKey="name" stroke="#94a3b8" style={{ fontSize: "12px" }} tick={{ fill: "#94a3b8" }} />
+                <YAxis stroke="#94a3b8" style={{ fontSize: "12px" }} tick={{ fill: "#94a3b8" }} />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: "#1e293b",
+                    border: "1px solid #334155",
+                    borderRadius: "10px",
+                    color: "#f8fafc",
+                  }}
+                  labelStyle={{ color: "#f8fafc" }}
+                  formatter={(value) => [value.toLocaleString(), dataLabel]}
+                />
+                <Area
+                  type="monotone"
+                  dataKey="value"
+                  stroke={TAILADMIN_BLUE}
+                  strokeWidth={2.5}
+                  fillOpacity={1}
+                  fill="url(#colorValue)"
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
         </div>
       </CardContent>
     </Card>
@@ -213,115 +136,37 @@ export function TailAdminMultiLineChart({
   labels,
   datasets,
   height = 400,
-  useTimeScale = false,
   icon,
 }: TailAdminMultiLineChartProps) {
+  const [scale, setScale] = useState(1)
+  const chartRef = useRef<HTMLDivElement>(null)
+
   const colors = [
-    { border: TAILADMIN_BLUE, bg: "rgba(70, 95, 255, 0.15)" },
-    { border: "#10b981", bg: "rgba(16, 185, 129, 0.15)" },
-    { border: "#f59e0b", bg: "rgba(245, 158, 11, 0.15)" },
-    { border: "#ef4444", bg: "rgba(239, 68, 68, 0.15)" },
+    { line: TAILADMIN_BLUE, fill: "rgba(59, 130, 246, 0.3)" },
+    { line: "rgba(59, 130, 246, 0.6)", fill: "rgba(59, 130, 246, 0.1)" },
+    { line: "#10b981", fill: "rgba(16, 185, 129, 0.15)" },
+    { line: "#f59e0b", fill: "rgba(245, 158, 11, 0.15)" },
+    { line: "#ef4444", fill: "rgba(239, 68, 68, 0.15)" },
   ]
 
-  const chartData = {
-    labels,
-    datasets: datasets.map((ds, index) => ({
-      label: ds.label,
-      data: ds.data,
-      borderColor: ds.color || colors[index % colors.length].border,
-      backgroundColor: ds.color ? `${ds.color}26` : colors[index % colors.length].bg,
-      fill: true,
-      tension: 0.4,
-      borderWidth: 2.5,
-      pointRadius: 0,
-      pointHoverRadius: 6,
-      pointBackgroundColor: ds.color || colors[index % colors.length].border,
-      pointBorderColor: "#fff",
-      pointBorderWidth: 3,
-    })),
-  }
+  // Convert data to Recharts format
+  const chartData = labels.map((label, idx) => ({
+    name: typeof label === "string" ? label : label.toLocaleDateString(),
+    ...datasets.reduce(
+      (acc, ds) => {
+        acc[ds.label] = ds.data[idx]
+        return acc
+      },
+      {} as Record<string, number>,
+    ),
+  }))
 
-  const chartOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    interaction: {
-      mode: "index" as const,
-      intersect: false,
-    },
-    plugins: {
-      legend: {
-        display: true,
-        position: "top" as const,
-        align: "end" as const,
-        labels: {
-          color: "#64748b",
-          usePointStyle: true,
-          pointStyle: "circle",
-          padding: 20,
-          font: {
-            size: 12,
-            weight: "500" as const,
-          },
-        },
-      },
-      tooltip: {
-        backgroundColor: "#1e293b",
-        titleColor: "#f8fafc",
-        bodyColor: "#f8fafc",
-        borderColor: "#334155",
-        borderWidth: 1,
-        padding: 14,
-        cornerRadius: 10,
-      },
-    },
-    scales: {
-      x: {
-        ...(useTimeScale
-          ? {
-              type: "time" as const,
-              time: {
-                unit: "day" as const,
-              },
-            }
-          : {
-              type: "category" as const,
-            }),
-        grid: {
-          display: true,
-          color: "rgba(148, 163, 184, 0.08)",
-          drawBorder: false,
-        },
-        ticks: {
-          color: "#94a3b8",
-          font: {
-            size: 12,
-            weight: "500" as const,
-          },
-        },
-        border: {
-          display: false,
-        },
-      },
-      y: {
-        beginAtZero: true,
-        grid: {
-          display: true,
-          color: "rgba(148, 163, 184, 0.08)",
-          drawBorder: false,
-        },
-        ticks: {
-          color: "#94a3b8",
-          font: {
-            size: 12,
-            weight: "500" as const,
-          },
-          padding: 12,
-        },
-        border: {
-          display: false,
-        },
-      },
-    },
+  const handleWheel = (e: React.WheelEvent) => {
+    e.preventDefault()
+    setScale((prev) => {
+      const newScale = e.deltaY > 0 ? Math.max(1, prev - 0.1) : prev + 0.1
+      return Math.min(newScale, 3)
+    })
   }
 
   return (
@@ -332,7 +177,7 @@ export function TailAdminMultiLineChart({
             {icon && (
               <div
                 className="w-10 h-10 rounded-xl flex items-center justify-center"
-                style={{ backgroundColor: "rgba(70, 95, 255, 0.08)" }}
+                style={{ backgroundColor: "rgba(59, 130, 246, 0.08)" }}
               >
                 {icon}
               </div>
@@ -345,8 +190,52 @@ export function TailAdminMultiLineChart({
         </div>
       </CardHeader>
       <CardContent className="px-6 pb-6">
-        <div style={{ height: `${height}px` }}>
-          <Line data={chartData} options={chartOptions} />
+        <div
+          ref={chartRef}
+          onWheel={handleWheel}
+          style={{
+            height: `${height}px`,
+            overflow: scale > 1 ? "auto" : "hidden",
+            cursor: "grab",
+          }}
+        >
+          <div style={{ transform: `scale(${scale})`, transformOrigin: "top left", transition: "transform 0.2s" }}>
+            <ResponsiveContainer width={scale > 1 ? "100%" : "100%"} height={height}>
+              <AreaChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                <defs>
+                  {colors.map((_, idx) => (
+                    <linearGradient key={`gradient-${idx}`} id={`colorGradient${idx}`} x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor={colors[idx].line} stopOpacity={0.3} />
+                      <stop offset="95%" stopColor={colors[idx].line} stopOpacity={0} />
+                    </linearGradient>
+                  ))}
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(148, 163, 184, 0.1)" vertical={false} />
+                <XAxis dataKey="name" stroke="#94a3b8" style={{ fontSize: "12px" }} tick={{ fill: "#94a3b8" }} />
+                <YAxis stroke="#94a3b8" style={{ fontSize: "12px" }} tick={{ fill: "#94a3b8" }} />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: "#1e293b",
+                    border: "1px solid #334155",
+                    borderRadius: "10px",
+                    color: "#f8fafc",
+                  }}
+                  labelStyle={{ color: "#f8fafc" }}
+                />
+                {datasets.map((ds, idx) => (
+                  <Area
+                    key={ds.label}
+                    type="monotone"
+                    dataKey={ds.label}
+                    stroke={ds.color || colors[idx % colors.length].line}
+                    strokeWidth={2.5}
+                    fillOpacity={1}
+                    fill={`url(#colorGradient${idx})`}
+                  />
+                ))}
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
         </div>
       </CardContent>
     </Card>

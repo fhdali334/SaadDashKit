@@ -13,7 +13,6 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar"
 import { KeywordHexagonChart } from "@/components/keyword-hexagon-chart"
 import { AdvancedHexagonChart } from "@/components/advanced-hexagon charts"
-
 import {
   Brain,
   Download,
@@ -24,14 +23,13 @@ import {
   BarChart3,
   Loader2,
   CalendarIcon,
-  Zap,
   Activity,
 } from "lucide-react"
 import { format } from "date-fns"
-import { ResponsiveContainer, Tooltip, CartesianGrid, XAxis, YAxis, BarChart, Bar } from "recharts"
+import { TailAdminBarChart } from "@/components/tailadmin-bar-chart"
 
-const TAILADMIN_BLUE = "#465FFF"
-const TAILADMIN_BLUE_LIGHT = "rgba(70, 95, 255, 0.08)"
+const TAILADMIN_BLUE = "#3b82f6"
+const TAILADMIN_BLUE_LIGHT = "rgba(59, 130, 246, 0.08)"
 
 interface Analysis {
   id: string
@@ -335,52 +333,16 @@ export default function AiAnalysis() {
 
             {/* Charts and History */}
             <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
-              <Card className="border-border rounded-3xl shadow-sm hover:shadow-md transition-all">
-                <CardHeader className="px-6 pt-6 pb-2">
-                  <div className="flex items-center gap-3">
-                    <div
-                      className="w-10 h-10 rounded-xl flex items-center justify-center"
-                      style={{ backgroundColor: TAILADMIN_BLUE_LIGHT }}
-                    >
-                      <Zap className="w-5 h-5" style={{ color: TAILADMIN_BLUE }} />
-                    </div>
-                    <div>
-                      <CardTitle className="text-base font-semibold">AI Token Usage</CardTitle>
-                      <CardDescription className="text-xs">Last 30 days</CardDescription>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="px-6 pb-6">
-                  {tokenUsageData.length > 0 ? (
-                    <ResponsiveContainer width="100%" height={200}>
-                      <BarChart data={tokenUsageData}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                        <XAxis
-                          dataKey="date"
-                          tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
-                          angle={-45}
-                          textAnchor="end"
-                          height={60}
-                        />
-                        <YAxis tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
-                        <Tooltip
-                          formatter={(value: any) => [`${value.toLocaleString()} tokens`, "Tokens"]}
-                          contentStyle={{
-                            backgroundColor: "hsl(var(--card))",
-                            border: "1px solid hsl(var(--border))",
-                            borderRadius: "12px",
-                          }}
-                        />
-                        <Bar dataKey="tokens" fill={TAILADMIN_BLUE} radius={[8, 8, 0, 0]} />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  ) : (
-                    <div className="h-[200px] flex items-center justify-center text-muted-foreground text-sm">
-                      No usage data available
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+              <div className="xl:col-span-1">
+                <TailAdminBarChart
+                  title="AI Token Usage"
+                  data={tokenUsageData.map((d) => ({
+                    name: d.date,
+                    value: d.tokens,
+                  }))}
+                  height={250}
+                />
+              </div>
 
               <Card className="border-border rounded-3xl shadow-sm hover:shadow-md transition-all xl:col-span-3">
                 <CardHeader className="px-6 pt-6 pb-4">
@@ -524,11 +486,9 @@ export default function AiAnalysis() {
             {/* Keywords and Keyphrases */}
             {selectedAnalysisId && analysisDetails && !isLoadingDetails && (
               <div className="grid gap-6 lg:grid-cols-2">
-                <KeywordHexagonChart keywords={analysisDetails.keywords} />
-                <AdvancedHexagonChart keywords={analysisDetails.keywords} />
-
-                <Card className="border-border rounded-2xl">
-                  <CardHeader className="px-6 pt-6 pb-4">
+                {/* Primary hexagon chart for keywords */}
+                <div className="bg-card rounded-3xl border border-border overflow-hidden shadow-sm hover:shadow-md transition-all">
+                  <div className="px-6 py-5 border-b border-border">
                     <div className="flex items-center gap-3">
                       <div
                         className="w-10 h-10 rounded-xl flex items-center justify-center"
@@ -537,24 +497,91 @@ export default function AiAnalysis() {
                         <FileText className="w-5 h-5" style={{ color: TAILADMIN_BLUE }} />
                       </div>
                       <div>
-                        <CardTitle className="text-lg font-semibold">Key Phrases</CardTitle>
-                        <CardDescription>Common expressions and patterns</CardDescription>
+                        <h3 className="text-lg font-semibold text-foreground">Keywords Analysis</h3>
+                        <p className="text-sm text-muted-foreground">Business-relevant terms identified by AI</p>
                       </div>
                     </div>
-                  </CardHeader>
-                  <CardContent className="px-6 pb-6">
-                    <div className="space-y-3">
-                      {(analysisDetails.keyphrases ?? []).slice(0, 10).map((kp) => (
-                        <div key={kp.id} className="flex items-center justify-between p-3 bg-muted/30 rounded-xl">
-                          <span className="text-sm font-medium text-foreground">{kp.keyphrase}</span>
-                          <Badge variant="outline" className="rounded-lg">
-                            {kp.frequency}x
-                          </Badge>
+                  </div>
+                  <div className="p-6">
+                    <KeywordHexagonChart keywords={analysisDetails.keywords} />
+                  </div>
+                </div>
+
+                {/* Secondary advanced hexagon chart */}
+                <div className="bg-card rounded-3xl border border-border overflow-hidden shadow-sm hover:shadow-md transition-all">
+                  <div className="px-6 py-5 border-b border-border">
+                    <div className="flex items-center gap-3">
+                      <div
+                        className="w-10 h-10 rounded-xl flex items-center justify-center"
+                        style={{ backgroundColor: TAILADMIN_BLUE_LIGHT }}
+                      >
+                        <Brain className="w-5 h-5" style={{ color: TAILADMIN_BLUE }} />
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-semibold text-foreground">Advanced Analysis</h3>
+                        <p className="text-sm text-muted-foreground">Comparative keyword insights</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="p-6">
+                    <AdvancedHexagonChart keywords={analysisDetails.keywords} />
+                  </div>
+                </div>
+
+                {/* Key Phrases Card */}
+                <div className="bg-card rounded-3xl border border-border overflow-hidden shadow-sm hover:shadow-md transition-all lg:col-span-2">
+                  <div className="px-6 py-5 border-b border-border">
+                    <div className="flex items-center gap-3">
+                      <div
+                        className="w-10 h-10 rounded-xl flex items-center justify-center"
+                        style={{ backgroundColor: TAILADMIN_BLUE_LIGHT }}
+                      >
+                        <MessageSquare className="w-5 h-5" style={{ color: TAILADMIN_BLUE }} />
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-semibold text-foreground">Key Phrases</h3>
+                        <p className="text-sm text-muted-foreground">
+                          Common expressions and patterns found in conversations
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="p-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {analysisDetails.keyphrases?.slice(0, 15).map((kp) => (
+                        <div key={kp.id} className="p-4 bg-muted/30 rounded-2xl hover:bg-muted/50 transition-colors">
+                          <div className="flex items-start justify-between mb-2">
+                            <p className="text-sm font-medium text-foreground flex-1">{kp.keyphrase}</p>
+                            <Badge
+                              variant="outline"
+                              className="rounded-lg ml-2 flex-shrink-0"
+                              style={{
+                                borderColor: TAILADMIN_BLUE,
+                                color: TAILADMIN_BLUE,
+                              }}
+                            >
+                              {kp.frequency}x
+                            </Badge>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <div className="h-1.5 flex-1 bg-muted rounded-full overflow-hidden">
+                              <div
+                                className="h-full rounded-full"
+                                style={{
+                                  width: `${Math.min((kp.relevanceScore || 0) * 100, 100)}%`,
+                                  backgroundColor: TAILADMIN_BLUE,
+                                }}
+                              />
+                            </div>
+                            <span className="text-xs text-muted-foreground">
+                              {(kp.relevanceScore * 100).toFixed(0)}%
+                            </span>
+                          </div>
                         </div>
                       ))}
                     </div>
-                  </CardContent>
-                </Card>
+                  </div>
+                </div>
               </div>
             )}
           </>
