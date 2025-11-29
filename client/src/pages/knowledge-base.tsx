@@ -91,7 +91,7 @@ export default function KnowledgeBase() {
 
       <main className="px-6 lg:px-8 py-8">
         {/* Main Tab Navigation */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8 ">
           {mainTabs.map((tab) => {
             const Icon = tab.icon
             const isActive = mainTab === tab.id

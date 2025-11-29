@@ -180,7 +180,7 @@ export default function QATab() {
   return (
     <div className="space-y-8">
       {/* Header Actions */}
-      <div className="flex items-center justify-between gap-4">
+      <div className="flex items-center justify-between gap-4 px-6 pt-4">
         <div>
           <h2 className="text-xl font-semibold text-foreground mb-1">
             Q&A Documents

@@ -22,26 +22,33 @@ export function TailAdminSmoothLineChart({
   showGrid = false,
 }: TailAdminSmoothLineChartProps) {
   return (
-    <div className="rounded-sm border border-stroke bg-white px-7.5 py-6 shadow-default dark:border-strokedark dark:bg-boxdark px-6">
-      {title && <div className="mb-6 px-0 text-xl font-semibold text-black dark:text-white">{title}</div>}
+    <div className="rounded-2xl border border-border bg-card px-6 py-6 shadow-sm">
+      {title && <div className="mb-6 px-0 text-xl font-semibold text-foreground">{title}</div>}
       <ResponsiveContainer width="100%" height={height}>
         <AreaChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-          {showGrid && <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />}
+          {showGrid && <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />}
           <XAxis
             dataKey="name"
-            tick={{ fill: "#9ca3af", fontSize: 14 }}
-            axisLine={{ stroke: "#e5e7eb" }}
+            tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 14 }}
+            axisLine={{ stroke: "hsl(var(--border))" }}
             tickLine={false}
           />
-          <YAxis tick={{ fill: "#9ca3af", fontSize: 14 }} axisLine={{ stroke: "#e5e7eb" }} tickLine={false} />
+          <YAxis
+            tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 14 }}
+            axisLine={{ stroke: "hsl(var(--border))" }}
+            tickLine={false}
+          />
           <Tooltip
             contentStyle={{
-              backgroundColor: "#ffffff",
-              border: "1px solid #e5e7eb",
-              borderRadius: "6px",
+              backgroundColor: "hsl(var(--card))",
+              border: "1px solid hsl(var(--border))",
+              borderRadius: "8px",
               boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+              color: "hsl(var(--foreground))",
             }}
-            cursor={{ stroke: "#e5e7eb" }}
+            labelStyle={{ color: "hsl(var(--foreground))" }}
+            itemStyle={{ color: "hsl(var(--foreground))" }}
+            cursor={{ stroke: "hsl(var(--border))" }}
           />
           <defs>
             <linearGradient id="gradient1" x1="0" y1="0" x2="0" y2="1">
@@ -49,8 +56,8 @@ export function TailAdminSmoothLineChart({
               <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
             </linearGradient>
             <linearGradient id="gradient2" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#93c5fd" stopOpacity={0.2} />
-              <stop offset="95%" stopColor="#93c5fd" stopOpacity={0} />
+              <stop offset="5%" stopColor="#10b981" stopOpacity={0.2} />
+              <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
             </linearGradient>
           </defs>
           <Area
@@ -64,7 +71,7 @@ export function TailAdminSmoothLineChart({
           <Area
             type="monotone"
             dataKey="value2"
-            stroke="#93c5fd"
+            stroke="#10b981"
             strokeWidth={2}
             fill="url(#gradient2)"
             isAnimationActive={true}

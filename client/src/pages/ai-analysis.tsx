@@ -20,16 +20,20 @@ import {
   FileText,
   MessageSquare,
   Sparkles,
-  BarChart3,
   Loader2,
   CalendarIcon,
   Activity,
+  Zap,
+  Target,
+  PieChart,
 } from "lucide-react"
 import { format } from "date-fns"
 import { TailAdminBarChart } from "@/components/tailadmin-bar-chart"
 
 const TAILADMIN_BLUE = "#3b82f6"
 const TAILADMIN_BLUE_LIGHT = "rgba(59, 130, 246, 0.08)"
+const TAILADMIN_PURPLE = "#8b5cf6"
+const TAILADMIN_EMERALD = "#10b981"
 
 interface Analysis {
   id: string
@@ -177,16 +181,24 @@ export default function AiAnalysis() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="bg-card border-b border-border sticky top-0 z-10">
+      <header className="bg-card border-b border-border sticky top-0 z-10 relative overflow-hidden">
+        {/* Gradient accent line */}
+        {/* <div
+          className="absolute top-0 left-0 right-0 h-1"
+          style={{ background: `linear-gradient(90deg, ${TAILADMIN_BLUE}, ${TAILADMIN_PURPLE})` }}
+        /> */}
         <div className="px-6 lg:px-8 py-5">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             <div className="flex items-center gap-4">
               <div
-                className="w-12 h-12 rounded-xl flex items-center justify-center"
-                style={{ backgroundColor: TAILADMIN_BLUE }}
+                className="w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg relative"
+                style={{
+                  background: `linear-gradient(135deg, ${TAILADMIN_BLUE}, ${TAILADMIN_PURPLE})`,
+                  boxShadow: `0 4px 20px ${TAILADMIN_BLUE}40`,
+                }}
               >
-                <Brain className="w-6 h-6 text-white" />
+                <Brain className="w-7 h-7 text-white" />
+                <Sparkles className="w-3 h-3 text-white/80 absolute -top-1 -right-1" />
               </div>
               <div>
                 <h1 className="text-2xl lg:text-3xl font-bold text-foreground">AI Transcript Analysis</h1>
@@ -198,8 +210,10 @@ export default function AiAnalysis() {
             <Button
               onClick={() => runAnalysis.mutate()}
               disabled={runAnalysis.isPending || remainingBalance <= 0}
-              className="h-12 rounded-xl text-white px-6"
-              style={{ backgroundColor: TAILADMIN_BLUE }}
+              className="h-12 rounded-xl text-white px-6 shadow-lg transition-all hover:shadow-xl"
+              style={{
+                background: `linear-gradient(135deg, ${TAILADMIN_BLUE}, ${TAILADMIN_PURPLE})`,
+              }}
             >
               {runAnalysis.isPending ? (
                 <>
@@ -251,13 +265,19 @@ export default function AiAnalysis() {
             ))}
           </div>
         ) : analyses.length === 0 ? (
-          <Card className="border-border rounded-2xl">
-            <CardContent className="py-16 text-center">
+          <Card className="border-border rounded-3xl overflow-hidden">
+            <CardContent className="py-16 text-center relative">
               <div
-                className="w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6"
-                style={{ backgroundColor: TAILADMIN_BLUE_LIGHT }}
+                className="absolute inset-0 opacity-5"
+                style={{ background: `linear-gradient(135deg, ${TAILADMIN_BLUE}, ${TAILADMIN_PURPLE})` }}
+              />
+              <div
+                className="w-24 h-24 rounded-3xl flex items-center justify-center mx-auto mb-6 relative"
+                style={{
+                  background: `linear-gradient(135deg, ${TAILADMIN_BLUE}15, ${TAILADMIN_PURPLE}15)`,
+                }}
               >
-                <Brain className="w-10 h-10" style={{ color: TAILADMIN_BLUE }} />
+                <Brain className="w-12 h-12" style={{ color: TAILADMIN_BLUE }} />
               </div>
               <h3 className="text-2xl font-bold text-foreground mb-3">No analyses yet</h3>
               <p className="text-muted-foreground mb-6 max-w-md mx-auto">
@@ -267,7 +287,7 @@ export default function AiAnalysis() {
                 onClick={() => runAnalysis.mutate()}
                 disabled={runAnalysis.isPending || remainingBalance <= 0}
                 className="h-12 rounded-xl text-white px-8"
-                style={{ backgroundColor: TAILADMIN_BLUE }}
+                style={{ background: `linear-gradient(135deg, ${TAILADMIN_BLUE}, ${TAILADMIN_PURPLE})` }}
               >
                 <Sparkles className="h-5 w-5 mr-2" />
                 Start First Analysis
@@ -276,10 +296,17 @@ export default function AiAnalysis() {
           </Card>
         ) : (
           <>
-            {/* Date Filter */}
-            <Card className="border-border rounded-2xl">
+            <Card className="border-border rounded-3xl shadow-sm">
               <CardHeader className="px-6 pt-6 pb-4">
-                <CardTitle className="text-lg font-semibold">Filter Analyses by Date</CardTitle>
+                <div className="flex items-center gap-3">
+                  <div
+                    className="w-10 h-10 rounded-xl flex items-center justify-center"
+                    style={{ backgroundColor: TAILADMIN_BLUE_LIGHT }}
+                  >
+                    <CalendarIcon className="w-5 h-5" style={{ color: TAILADMIN_BLUE }} />
+                  </div>
+                  <CardTitle className="text-lg font-semibold">Filter Analyses by Date</CardTitle>
+                </div>
               </CardHeader>
               <CardContent className="px-6 pb-6">
                 <div className="flex flex-wrap gap-4 items-end">
@@ -331,8 +358,8 @@ export default function AiAnalysis() {
               </CardContent>
             </Card>
 
-            {/* Charts and History */}
             <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
+              {/* Token Usage Chart */}
               <div className="xl:col-span-1">
                 <TailAdminBarChart
                   title="AI Token Usage"
@@ -344,12 +371,16 @@ export default function AiAnalysis() {
                 />
               </div>
 
-              <Card className="border-border rounded-3xl shadow-sm hover:shadow-md transition-all xl:col-span-3">
+              <Card className="border-border rounded-3xl shadow-sm hover:shadow-md transition-all xl:col-span-3 overflow-hidden">
+                <div
+                  className="absolute top-0 left-0 right-0 h-1 opacity-50"
+                  style={{ background: `linear-gradient(90deg, ${TAILADMIN_BLUE}, ${TAILADMIN_PURPLE})` }}
+                />
                 <CardHeader className="px-6 pt-6 pb-4">
                   <div className="flex items-center gap-3">
                     <div
                       className="w-10 h-10 rounded-xl flex items-center justify-center"
-                      style={{ backgroundColor: TAILADMIN_BLUE_LIGHT }}
+                      style={{ background: `linear-gradient(135deg, ${TAILADMIN_BLUE}15, ${TAILADMIN_PURPLE}15)` }}
                     >
                       <Activity className="w-5 h-5" style={{ color: TAILADMIN_BLUE }} />
                     </div>
@@ -374,7 +405,7 @@ export default function AiAnalysis() {
                             key={analysis.id}
                             className={`p-4 rounded-2xl border cursor-pointer transition-all hover:shadow-md ${
                               selectedAnalysisId === analysis.id
-                                ? "border-2 bg-muted/30"
+                                ? "border-2 bg-gradient-to-r from-blue-50/50 to-purple-50/50 dark:from-blue-950/30 dark:to-purple-950/30"
                                 : "border-border hover:border-muted-foreground/30"
                             }`}
                             style={selectedAnalysisId === analysis.id ? { borderColor: TAILADMIN_BLUE } : {}}
@@ -422,39 +453,50 @@ export default function AiAnalysis() {
               </Card>
             </div>
 
-            {/* Analysis Details */}
             {selectedAnalysisId && analysisDetails && !isLoadingDetails && (
               <div className="grid gap-6 md:grid-cols-3">
-                <Card className="border-border rounded-2xl">
+                {/* Conversion Rate Card */}
+                <Card className="border-border rounded-3xl overflow-hidden shadow-sm hover:shadow-md transition-all">
+                  <div
+                    className="h-1"
+                    style={{ background: `linear-gradient(90deg, ${TAILADMIN_BLUE}, ${TAILADMIN_BLUE}80)` }}
+                  />
                   <CardContent className="p-6">
                     <div className="flex items-center gap-3 mb-4">
                       <div
-                        className="w-10 h-10 rounded-xl flex items-center justify-center"
-                        style={{ backgroundColor: TAILADMIN_BLUE_LIGHT }}
+                        className="w-12 h-12 rounded-2xl flex items-center justify-center"
+                        style={{ background: `linear-gradient(135deg, ${TAILADMIN_BLUE}15, ${TAILADMIN_BLUE}25)` }}
                       >
-                        <BarChart3 className="w-5 h-5" style={{ color: TAILADMIN_BLUE }} />
+                        <Target className="w-6 h-6" style={{ color: TAILADMIN_BLUE }} />
                       </div>
                       <span className="text-sm font-medium text-muted-foreground">Conversion Rate</span>
                     </div>
-                    <p className="text-3xl font-bold" style={{ color: TAILADMIN_BLUE }}>
+                    <p className="text-4xl font-bold" style={{ color: TAILADMIN_BLUE }}>
                       {(analysisDetails.conversionRate * 100).toFixed(1)}%
                     </p>
                     <p className="text-xs text-muted-foreground mt-2">Success ratio of conversations</p>
                   </CardContent>
                 </Card>
 
-                <Card className="border-border rounded-2xl">
+                {/* Sentiment Card */}
+                <Card className="border-border rounded-3xl overflow-hidden shadow-sm hover:shadow-md transition-all">
+                  <div
+                    className="h-1"
+                    style={{ background: `linear-gradient(90deg, ${TAILADMIN_EMERALD}, ${TAILADMIN_EMERALD}80)` }}
+                  />
                   <CardContent className="p-6">
                     <div className="flex items-center gap-3 mb-4">
                       <div
-                        className="w-10 h-10 rounded-xl flex items-center justify-center"
-                        style={{ backgroundColor: TAILADMIN_BLUE_LIGHT }}
+                        className="w-12 h-12 rounded-2xl flex items-center justify-center"
+                        style={{
+                          background: `linear-gradient(135deg, ${TAILADMIN_EMERALD}15, ${TAILADMIN_EMERALD}25)`,
+                        }}
                       >
-                        <MessageSquare className="w-5 h-5" style={{ color: TAILADMIN_BLUE }} />
+                        <Zap className="w-6 h-6" style={{ color: TAILADMIN_EMERALD }} />
                       </div>
                       <span className="text-sm font-medium text-muted-foreground">Avg Sentiment</span>
                     </div>
-                    <p className={`text-3xl font-bold ${getSentimentColor(analysisDetails.averageSentiment)}`}>
+                    <p className={`text-4xl font-bold ${getSentimentColor(analysisDetails.averageSentiment)}`}>
                       {getSentimentLabel(analysisDetails.averageSentiment)}
                     </p>
                     <p className="text-xs text-muted-foreground mt-2">
@@ -463,18 +505,23 @@ export default function AiAnalysis() {
                   </CardContent>
                 </Card>
 
-                <Card className="border-border rounded-2xl">
+                {/* Transcripts Card */}
+                <Card className="border-border rounded-3xl overflow-hidden shadow-sm hover:shadow-md transition-all">
+                  <div
+                    className="h-1"
+                    style={{ background: `linear-gradient(90deg, ${TAILADMIN_PURPLE}, ${TAILADMIN_PURPLE}80)` }}
+                  />
                   <CardContent className="p-6">
                     <div className="flex items-center gap-3 mb-4">
                       <div
-                        className="w-10 h-10 rounded-xl flex items-center justify-center"
-                        style={{ backgroundColor: TAILADMIN_BLUE_LIGHT }}
+                        className="w-12 h-12 rounded-2xl flex items-center justify-center"
+                        style={{ background: `linear-gradient(135deg, ${TAILADMIN_PURPLE}15, ${TAILADMIN_PURPLE}25)` }}
                       >
-                        <FileText className="w-5 h-5" style={{ color: TAILADMIN_BLUE }} />
+                        <PieChart className="w-6 h-6" style={{ color: TAILADMIN_PURPLE }} />
                       </div>
                       <span className="text-sm font-medium text-muted-foreground">Transcripts Analyzed</span>
                     </div>
-                    <p className="text-3xl font-bold" style={{ color: TAILADMIN_BLUE }}>
+                    <p className="text-4xl font-bold" style={{ color: TAILADMIN_PURPLE }}>
                       {analysisDetails.totalTranscripts}
                     </p>
                     <p className="text-xs text-muted-foreground mt-2">Total conversations processed</p>
@@ -483,16 +530,19 @@ export default function AiAnalysis() {
               </div>
             )}
 
-            {/* Keywords and Keyphrases */}
             {selectedAnalysisId && analysisDetails && !isLoadingDetails && (
               <div className="grid gap-6 lg:grid-cols-2">
                 {/* Primary hexagon chart for keywords */}
                 <div className="bg-card rounded-3xl border border-border overflow-hidden shadow-sm hover:shadow-md transition-all">
+                  <div
+                    className="h-1"
+                    style={{ background: `linear-gradient(90deg, ${TAILADMIN_BLUE}, ${TAILADMIN_PURPLE})` }}
+                  />
                   <div className="px-6 py-5 border-b border-border">
                     <div className="flex items-center gap-3">
                       <div
                         className="w-10 h-10 rounded-xl flex items-center justify-center"
-                        style={{ backgroundColor: TAILADMIN_BLUE_LIGHT }}
+                        style={{ background: `linear-gradient(135deg, ${TAILADMIN_BLUE}15, ${TAILADMIN_PURPLE}15)` }}
                       >
                         <FileText className="w-5 h-5" style={{ color: TAILADMIN_BLUE }} />
                       </div>
@@ -509,13 +559,17 @@ export default function AiAnalysis() {
 
                 {/* Secondary advanced hexagon chart */}
                 <div className="bg-card rounded-3xl border border-border overflow-hidden shadow-sm hover:shadow-md transition-all">
+                  <div
+                    className="h-1"
+                    style={{ background: `linear-gradient(90deg, ${TAILADMIN_PURPLE}, ${TAILADMIN_BLUE})` }}
+                  />
                   <div className="px-6 py-5 border-b border-border">
                     <div className="flex items-center gap-3">
                       <div
                         className="w-10 h-10 rounded-xl flex items-center justify-center"
-                        style={{ backgroundColor: TAILADMIN_BLUE_LIGHT }}
+                        style={{ background: `linear-gradient(135deg, ${TAILADMIN_PURPLE}15, ${TAILADMIN_BLUE}15)` }}
                       >
-                        <Brain className="w-5 h-5" style={{ color: TAILADMIN_BLUE }} />
+                        <Brain className="w-5 h-5" style={{ color: TAILADMIN_PURPLE }} />
                       </div>
                       <div>
                         <h3 className="text-lg font-semibold text-foreground">Advanced Analysis</h3>
@@ -530,13 +584,19 @@ export default function AiAnalysis() {
 
                 {/* Key Phrases Card */}
                 <div className="bg-card rounded-3xl border border-border overflow-hidden shadow-sm hover:shadow-md transition-all lg:col-span-2">
+                  <div
+                    className="h-1"
+                    style={{
+                      background: `linear-gradient(90deg, ${TAILADMIN_EMERALD}, ${TAILADMIN_BLUE}, ${TAILADMIN_PURPLE})`,
+                    }}
+                  />
                   <div className="px-6 py-5 border-b border-border">
                     <div className="flex items-center gap-3">
                       <div
                         className="w-10 h-10 rounded-xl flex items-center justify-center"
-                        style={{ backgroundColor: TAILADMIN_BLUE_LIGHT }}
+                        style={{ background: `linear-gradient(135deg, ${TAILADMIN_EMERALD}15, ${TAILADMIN_BLUE}15)` }}
                       >
-                        <MessageSquare className="w-5 h-5" style={{ color: TAILADMIN_BLUE }} />
+                        <MessageSquare className="w-5 h-5" style={{ color: TAILADMIN_EMERALD }} />
                       </div>
                       <div>
                         <h3 className="text-lg font-semibold text-foreground">Key Phrases</h3>
@@ -549,7 +609,10 @@ export default function AiAnalysis() {
                   <div className="p-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                       {analysisDetails.keyphrases?.slice(0, 15).map((kp) => (
-                        <div key={kp.id} className="p-4 bg-muted/30 rounded-2xl hover:bg-muted/50 transition-colors">
+                        <div
+                          key={kp.id}
+                          className="p-4 bg-muted/30 rounded-2xl hover:bg-muted/50 transition-colors border border-transparent hover:border-border"
+                        >
                           <div className="flex items-start justify-between mb-2">
                             <p className="text-sm font-medium text-foreground flex-1">{kp.keyphrase}</p>
                             <Badge
@@ -564,12 +627,12 @@ export default function AiAnalysis() {
                             </Badge>
                           </div>
                           <div className="flex items-center gap-2">
-                            <div className="h-1.5 flex-1 bg-muted rounded-full overflow-hidden">
+                            <div className="h-2 flex-1 bg-muted rounded-full overflow-hidden">
                               <div
-                                className="h-full rounded-full"
+                                className="h-full rounded-full transition-all"
                                 style={{
                                   width: `${Math.min((kp.relevanceScore || 0) * 100, 100)}%`,
-                                  backgroundColor: TAILADMIN_BLUE,
+                                  background: `linear-gradient(90deg, ${TAILADMIN_BLUE}, ${TAILADMIN_PURPLE})`,
                                 }}
                               />
                             </div>

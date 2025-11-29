@@ -3,7 +3,8 @@
 import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts"
 
 interface TailAdminSemicircleChartProps {
-  percentage: number
+  percentage?: number
+  successRate?: number
   change?: number
   title?: string
   subtitle?: string
@@ -11,14 +12,16 @@ interface TailAdminSemicircleChartProps {
 }
 
 export function TailAdminSemicircleChart({
-  percentage = 0, // default to 0 to avoid undefined
+  percentage,
+  successRate,
   change,
   title = "Monthly Target",
   subtitle = "Target you've set for each month",
   height = 300,
 }: TailAdminSemicircleChartProps) {
-  // Coerce and clamp the percentage to a safe number (0..100)
-  const parsedPercentage = Number.isFinite(percentage) ? percentage : Number(percentage) || 0
+  // Support both percentage and successRate props
+  const rawValue = percentage ?? successRate ?? 0
+  const parsedPercentage = Number.isFinite(rawValue) ? rawValue : Number(rawValue) || 0
   const safePercentage = Math.max(0, Math.min(100, parsedPercentage))
 
   const data = [
@@ -27,10 +30,10 @@ export function TailAdminSemicircleChart({
   ]
 
   return (
-    <div className="rounded-sm border border-stroke bg-white px-6 py-6 shadow-default dark:border-strokedark dark:bg-boxdark">
+    <div className="rounded-2xl border border-border bg-card px-6 py-6 shadow-sm">
       <div className="mb-8 px-0">
-        <h3 className="text-xl font-semibold text-black dark:text-white">{title}</h3>
-        <p className="text-sm text-bodydark">{subtitle}</p>
+        <h3 className="text-xl font-semibold text-foreground">{title}</h3>
+        <p className="text-sm text-muted-foreground">{subtitle}</p>
       </div>
 
       <div className="flex flex-col items-center justify-center">
@@ -48,19 +51,17 @@ export function TailAdminSemicircleChart({
               stroke="none"
             >
               <Cell fill="#3b82f6" />
-              <Cell fill="#e5e7eb" />
+              <Cell fill="hsl(var(--muted))" />
             </Pie>
           </PieChart>
         </ResponsiveContainer>
 
-        <div className="relative -mt-16 text-center ">
-          <div className="text-4xl font-bold text-black dark:text-white">{safePercentage.toFixed(2)}%</div>
+        <div className="relative -mt-16 text-center">
+          <div className="text-4xl font-bold text-foreground">{safePercentage.toFixed(1)}%</div>
           {change !== undefined && (
             <div
               className={`mt-2 inline-block px-3 py-1 rounded-full text-sm font-semibold ${
-                change >= 0
-                  ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
-                  : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+                change >= 0 ? "bg-emerald-500/10 text-emerald-500" : "bg-red-500/10 text-red-500"
               }`}
             >
               {change >= 0 ? "+" : ""}

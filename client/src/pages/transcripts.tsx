@@ -6,14 +6,15 @@ import { TranscriptList } from "@/components/TranscriptList"
 import { TranscriptChat } from "@/components/TranscriptChat"
 import { BulkExportBar } from "@/components/BulkExportBar"
 import type { Message } from "@shared/schema"
-import { MessageSquare, RefreshCw, Settings, LogOut } from "lucide-react"
+import { MessageSquare, RefreshCw, Settings, LogOut, Sparkles } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { Button } from "@/components/ui/button"
 import { queryClient, apiRequest } from "@/lib/queryClient"
 import { useLocation } from "wouter"
 
-const TAILADMIN_PURPLE = "#9333EA"
-const TAILADMIN_PURPLE_LIGHT = "rgba(147, 51, 234, 0.08)"
+const TAILADMIN_PURPLE = "#8b5cf6"
+const TAILADMIN_PURPLE_LIGHT = "rgba(139, 92, 246, 0.08)"
+const TAILADMIN_PURPLE_DARK = "#7c3aed"
 
 export default function Transcripts() {
   const [selectedTranscriptId, setSelectedTranscriptId] = useState<string | null>(null)
@@ -151,16 +152,24 @@ export default function Transcripts() {
 
   return (
     <div className="flex flex-col h-screen bg-background">
-      {/* Header */}
       <header className="bg-card border-b border-border sticky top-0 z-10">
         <div className="px-6 py-4">
+          {/* Purple gradient accent line */}
+          {/* <div
+            className="absolute top-0 left-0 right-0 h-1"
+            style={{ background: `linear-gradient(90deg, ${TAILADMIN_PURPLE}, ${TAILADMIN_PURPLE_DARK})` }}
+          /> */}
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-4">
               <div
-                className="w-10 h-10 rounded-xl flex items-center justify-center"
-                style={{ backgroundColor: TAILADMIN_PURPLE }}
+                className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg relative"
+                style={{
+                  background: `linear-gradient(135deg, ${TAILADMIN_PURPLE}, ${TAILADMIN_PURPLE_DARK})`,
+                  boxShadow: `0 4px 20px ${TAILADMIN_PURPLE}40`,
+                }}
               >
-                <MessageSquare className="w-5 h-5 text-white" />
+                <MessageSquare className="w-6 h-6 text-white" />
+                <Sparkles className="w-3 h-3 text-white/80 absolute -top-1 -right-1" />
               </div>
               <div>
                 <h1 className="text-xl font-bold text-foreground">Transcript Viewer</h1>
@@ -174,10 +183,11 @@ export default function Transcripts() {
                 onClick={handleRefresh}
                 disabled={isRefetchingTranscripts || isLoadingTranscripts}
                 data-testid="button-refresh"
-                className="rounded-xl border-border hover:bg-muted bg-transparent"
+                className="rounded-xl border-border hover:border-violet-300 hover:bg-violet-50 dark:hover:bg-violet-950/30 bg-transparent transition-all"
               >
                 <RefreshCw
                   className={`h-4 w-4 mr-2 ${isRefetchingTranscripts || isLoadingTranscripts ? "animate-spin" : ""}`}
+                  style={{ color: TAILADMIN_PURPLE }}
                 />
                 Refresh
               </Button>
@@ -186,7 +196,7 @@ export default function Transcripts() {
                 size="sm"
                 onClick={() => setLocation("/settings")}
                 data-testid="button-settings"
-                className="rounded-xl border-border hover:bg-muted"
+                className="rounded-xl border-border hover:border-violet-300 hover:bg-violet-50 dark:hover:bg-violet-950/30"
               >
                 <Settings className="h-4 w-4 mr-2" />
                 Settings
@@ -217,7 +227,6 @@ export default function Transcripts() {
 
       {/* Main Content */}
       <div className="flex flex-1 overflow-hidden">
-        {/* Sidebar */}
         <div className="w-80 lg:w-96 flex-shrink-0 bg-card border-r border-border">
           <TranscriptList
             transcripts={transcripts}
@@ -243,10 +252,19 @@ export default function Transcripts() {
           ) : (
             <div className="flex flex-col h-full items-center justify-center">
               <div
-                className="w-20 h-20 rounded-2xl flex items-center justify-center mb-6"
-                style={{ backgroundColor: TAILADMIN_PURPLE_LIGHT }}
+                className="w-24 h-24 rounded-3xl flex items-center justify-center mb-6 relative"
+                style={{
+                  background: `linear-gradient(135deg, ${TAILADMIN_PURPLE_LIGHT}, rgba(139, 92, 246, 0.15))`,
+                  boxShadow: `0 8px 32px ${TAILADMIN_PURPLE}20`,
+                }}
               >
-                <MessageSquare className="w-10 h-10" style={{ color: TAILADMIN_PURPLE }} />
+                <MessageSquare className="w-12 h-12" style={{ color: TAILADMIN_PURPLE }} />
+                <div
+                  className="absolute inset-0 rounded-3xl animate-pulse"
+                  style={{
+                    background: `linear-gradient(135deg, transparent, ${TAILADMIN_PURPLE}10)`,
+                  }}
+                />
               </div>
               <p className="text-xl font-semibold text-foreground mb-2">Select a transcript</p>
               <p className="text-muted-foreground">Choose a conversation from the list to view</p>

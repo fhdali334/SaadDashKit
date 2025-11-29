@@ -67,7 +67,6 @@ function PaymentForm({
         throw submitError
       }
 
-      // Confirm payment with existing clientSecret
       const { error: confirmError, paymentIntent } = await stripe.confirmPayment({
         clientSecret,
         elements,
@@ -82,7 +81,6 @@ function PaymentForm({
       }
 
       if (paymentIntent && paymentIntent.status === "succeeded") {
-        // Complete payment on backend
         const completeRes = await fetch("/api/plans/complete-payment", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -152,18 +150,15 @@ export function PlanSelector({ plans, selectedPlanId, onSelectPlan }: PlanSelect
   const sortedPlans = [...plans].sort((a, b) => a.tier - b.tier)
 
   const handlePlanClick = async (plan: Plan) => {
-    // If already selected, do nothing
     if (plan.id === selectedPlanId) {
       return
     }
 
-    // Free plan can be selected directly
     if (plan.price === 0) {
       updatePlanMutation.mutate(plan.id)
       return
     }
 
-    // Check if Stripe is configured before attempting payment
     const publicKey = import.meta.env.VITE_STRIPE_PUBLIC_KEY || import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
     if (!publicKey || publicKey.trim() === "") {
       toast({
@@ -174,9 +169,7 @@ export function PlanSelector({ plans, selectedPlanId, onSelectPlan }: PlanSelect
       return
     }
 
-    // Paid plans require payment
     try {
-      // Create payment intent
       const res = await fetch("/api/plans/payment-intent", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -248,9 +241,9 @@ export function PlanSelector({ plans, selectedPlanId, onSelectPlan }: PlanSelect
 
   return (
     <>
-      <Card data-testid="card-plan-selector" className="border-gray-200 bg-white shadow-sm">
+      <Card data-testid="card-plan-selector" className="border-border bg-card shadow-sm">
         <CardHeader className="px-4 py-4 sm:px-6 sm:py-6">
-          <CardTitle className="flex items-center gap-2 text-base sm:text-lg text-gray-800">
+          <CardTitle className="flex items-center gap-2 text-base sm:text-lg text-foreground">
             <Package className="w-4 h-4 sm:w-5 sm:h-5" style={{ color: TAILADMIN_BLUE }} />
             Select Your Plan
           </CardTitle>
@@ -267,8 +260,8 @@ export function PlanSelector({ plans, selectedPlanId, onSelectPlan }: PlanSelect
                     relative h-auto p-3 sm:p-4 flex flex-col items-center gap-2 rounded-lg border-2 transition-all
                     ${
                       isSelected
-                        ? "border-[#465FFF] bg-blue-50/50"
-                        : "border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50"
+                        ? "border-[#465FFF] bg-blue-50/50 dark:bg-blue-950/30"
+                        : "border-border bg-card hover:border-muted-foreground/30 hover:bg-muted/50"
                     }
                   `}
                   onClick={() => handlePlanClick(plan)}
@@ -283,19 +276,21 @@ export function PlanSelector({ plans, selectedPlanId, onSelectPlan }: PlanSelect
                       <Check className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
                     </div>
                   )}
-                  <span className="text-base sm:text-lg font-bold text-gray-800">{plan.name}</span>
+                  <span className="text-base sm:text-lg font-bold text-foreground">{plan.name}</span>
                   <div className="flex flex-col items-center gap-0.5 sm:gap-1">
-                    <span className="text-xl sm:text-2xl font-bold font-mono text-gray-900">
+                    <span className="text-xl sm:text-2xl font-bold font-mono text-foreground">
                       ${plan.price === 0 ? "0" : plan.price}
                     </span>
-                    {plan.price > 0 && <span className="text-xs text-gray-500">/month</span>}
+                    {plan.price > 0 && <span className="text-xs text-muted-foreground">/month</span>}
                   </div>
-                  <span className="text-xs text-gray-500">${plan.initialBalance.toFixed(0)} Initial Balance</span>
+                  <span className="text-xs text-muted-foreground">
+                    ${plan.initialBalance.toFixed(0)} Initial Balance
+                  </span>
                   <Badge
                     variant="secondary"
                     className="mt-1 flex items-center gap-1 text-xs"
                     style={{
-                      backgroundColor: isSelected ? "#EEF2FF" : undefined,
+                      backgroundColor: isSelected ? "rgba(70, 95, 255, 0.15)" : undefined,
                       color: isSelected ? TAILADMIN_BLUE : undefined,
                     }}
                   >
@@ -340,7 +335,7 @@ export function PlanSelector({ plans, selectedPlanId, onSelectPlan }: PlanSelect
                 />
               </Elements>
             ) : (
-              <div className="text-center text-gray-500 p-4 text-sm">
+              <div className="text-center text-muted-foreground p-4 text-sm">
                 Stripe payment integration is not configured. Please set VITE_STRIPE_PUBLIC_KEY or
                 VITE_STRIPE_PUBLISHABLE_KEY environment variable.
               </div>
