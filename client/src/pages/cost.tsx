@@ -1,7 +1,7 @@
 "use client"
 
-import { useQuery, useQueryClient } from "@tanstack/react-query"
-import { useState } from "react"
+import { useQueryClient } from "@tanstack/react-query"
+import { useState, useMemo } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
@@ -27,6 +27,43 @@ import { TailAdminSmoothLineChart } from "@/components/tailadmin-smooth-line-cha
 
 const TAILADMIN_BLUE = "#3b82f6"
 const TAILADMIN_BLUE_LIGHT = "rgba(59, 130, 246, 0.08)"
+
+function generateCostChartData() {
+  const data = []
+  const now = new Date()
+
+  for (let i = 29; i >= 0; i--) {
+    const date = new Date(now)
+    date.setDate(date.getDate() - i)
+
+    // Generate realistic fluctuating data with trends
+    const dayOfWeek = date.getDay()
+    const isWeekend = dayOfWeek === 0 || dayOfWeek === 6
+
+    // Base values with some randomness
+    const baseTokens = isWeekend ? 400 : 700
+    const tokenVariance = Math.random() * 300 - 150
+    const aiTokens = Math.round(Math.max(200, baseTokens + tokenVariance + (29 - i) * 15))
+
+    const baseCredits = isWeekend ? 100 : 180
+    const creditVariance = Math.random() * 80 - 40
+    const chatbotCredits = Math.round(Math.max(50, baseCredits + creditVariance + (29 - i) * 5))
+
+    // Cost calculation based on usage
+    const aiCost = Number((aiTokens * 0.001).toFixed(2))
+    const chatbotCost = Number((chatbotCredits * 0.001).toFixed(2))
+
+    data.push({
+      name: date.toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+      aiTokens,
+      chatbotCredits,
+      aiCost,
+      chatbotCost,
+    })
+  }
+
+  return data
+}
 
 interface UsageData {
   openai: {
@@ -286,27 +323,40 @@ export default function Cost() {
   const [showBuyModal, setShowBuyModal] = useState(false)
   const [showTopUpModal, setShowTopUpModal] = useState(false)
 
-  const { data: usageData, isLoading } = useQuery<UsageData>({
-    queryKey: ["/api/usage/cost-breakdown"],
-  })
+  const chartData = useMemo(() => generateCostChartData(), [])
 
-  const chartData = [
-    { name: "Day 1", aiTokens: 450, chatbotCredits: 120, aiCost: 0.45, chatbotCost: 0.12 },
-    { name: "Day 2", aiTokens: 320, chatbotCredits: 95, aiCost: 0.32, chatbotCost: 0.09 },
-    { name: "Day 3", aiTokens: 680, chatbotCredits: 210, aiCost: 0.68, chatbotCost: 0.21 },
-    { name: "Day 4", aiTokens: 420, chatbotCredits: 155, aiCost: 0.42, chatbotCost: 0.15 },
-    { name: "Day 5", aiTokens: 890, chatbotCredits: 340, aiCost: 0.89, chatbotCost: 0.34 },
-    { name: "Day 6", aiTokens: 530, chatbotCredits: 180, aiCost: 0.53, chatbotCost: 0.18 },
-    { name: "Day 7", aiTokens: 710, chatbotCredits: 265, aiCost: 0.71, chatbotCost: 0.26 },
-  ]
+  const totalAiTokens = useMemo(() => chartData.reduce((sum, d) => sum + d.aiTokens, 0), [chartData])
+  const totalChatbotCredits = useMemo(() => chartData.reduce((sum, d) => sum + d.chatbotCredits, 0), [chartData])
+  const totalAiCost = useMemo(() => chartData.reduce((sum, d) => sum + d.aiCost, 0), [chartData])
+  const totalChatbotCost = useMemo(() => chartData.reduce((sum, d) => sum + d.chatbotCost, 0), [chartData])
 
-  if (isLoading) {
-    return <div className="p-8">Loading...</div>
-  }
+  const usageData: UsageData = useMemo(
+    () => ({
+      openai: {
+        tokensUsed: totalAiTokens,
+        costUsd: Number(totalAiCost.toFixed(2)),
+        systemCost: Number((totalAiCost * 0.15).toFixed(2)),
+        tokensChange: 12.5,
+        costChange: 8.3,
+      },
+      chatbot: {
+        creditsUsed: totalChatbotCredits,
+        creditsTotal: 10000,
+        creditsRemaining: 10000 - totalChatbotCredits,
+        creditsChange: -5.2,
+      },
+      account: {
+        initialBalance: 100,
+        remainingBalance: Math.max(0, 100 - totalAiCost - totalChatbotCost),
+        resetAt: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString(),
+      },
+    }),
+    [totalAiTokens, totalChatbotCredits, totalAiCost, totalChatbotCost],
+  )
 
-  const openaiData = usageData?.openai || { tokensUsed: 0, costUsd: 0, systemCost: 0 }
-  const chatbotData = usageData?.chatbot || { creditsUsed: 0, creditsTotal: 1000, creditsRemaining: 1000 }
-  const accountData = usageData?.account || { initialBalance: 100, remainingBalance: 45.5, resetAt: "" }
+  const openaiData = usageData.openai
+  const chatbotData = usageData.chatbot
+  const accountData = usageData.account
 
   return (
     <div className="min-h-screen bg-background">
@@ -470,16 +520,17 @@ export default function Cost() {
           </Card>
         </div>
 
-        {/* Overlapping Charts Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <TailAdminSmoothLineChart
-            title="AI Tokens vs Cost"
+            title="AI Tokens vs Chatbot Credits"
             data={chartData.map((d) => ({
               name: d.name,
               value1: d.aiTokens,
               value2: d.chatbotCredits,
             }))}
             height={350}
+            series1Label="AI Tokens"
+            series2Label="Chatbot Credits"
           />
 
           <TailAdminBarChart
@@ -489,10 +540,10 @@ export default function Cost() {
               value: d.aiTokens,
             }))}
             height={350}
+            series1Label="AI Tokens"
           />
         </div>
 
-        {/* Second row of charts using exact TailAdmin styles */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <TailAdminBarChart
             title="Chatbot Credits Used"
@@ -501,6 +552,7 @@ export default function Cost() {
               value: d.chatbotCredits,
             }))}
             height={350}
+            series1Label="Credits"
           />
 
           <TailAdminSmoothLineChart
@@ -511,6 +563,8 @@ export default function Cost() {
               value2: Number.parseFloat(d.chatbotCost.toFixed(2)),
             }))}
             height={350}
+            series1Label="AI Cost ($)"
+            series2Label="Chatbot Cost ($)"
           />
         </div>
 
