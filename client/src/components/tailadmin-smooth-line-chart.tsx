@@ -178,17 +178,7 @@ export function TailAdminSmoothLineChart({
                 activeDot={{ r: 6, fill: "#8b5cf6", stroke: "#fff", strokeWidth: 2 }}
               />
             )}
-            <Brush
-              dataKey="name"
-              height={24}
-              stroke="hsl(var(--border))"
-              fill="hsl(var(--muted))"
-              travellerWidth={10}
-              startIndex={startIndex}
-              endIndex={endIndex}
-              onChange={handleBrushChange}
-            />
-          </AreaChart>
+           </AreaChart>
         </ResponsiveContainer>
       </div>
       <p className="text-xs text-muted-foreground text-center mt-2">Scroll on chart to zoom • Drag slider to pan</p>

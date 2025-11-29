@@ -163,16 +163,7 @@ export function TailAdminBarChart({
                 animationDuration={800}
               />
             )}
-            <Brush
-              dataKey="name"
-              height={24}
-              stroke="hsl(var(--border))"
-              fill="hsl(var(--muted))"
-              travellerWidth={10}
-              startIndex={startIndex}
-              endIndex={endIndex}
-              onChange={handleBrushChange}
-            />
+           
           </BarChart>
         </ResponsiveContainer>
       </div>
