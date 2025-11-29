@@ -12,6 +12,8 @@ import { Label } from "@/components/ui/label"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
 import { KeywordHexagonChart } from "@/components/keyword-hexagon-chart"
+import { TailAdminSmoothLineChart } from "@/components/tailadmin-smooth-line-chart"
+import { TailAdminBarChart } from "@/components/tailadmin-bar-chart"
 import { AdvancedHexagonChart } from "@/components/advanced-hexagon charts"
 import {
   Brain,
@@ -26,9 +28,9 @@ import {
   Zap,
   Target,
   PieChart,
+  BarChart3,
 } from "lucide-react"
 import { format } from "date-fns"
-import { TailAdminBarChart } from "@/components/tailadmin-bar-chart"
 
 const TAILADMIN_BLUE = "#3b82f6"
 const TAILADMIN_BLUE_LIGHT = "rgba(59, 130, 246, 0.08)"
@@ -167,26 +169,28 @@ export default function AiAnalysis() {
   }
 
   const tokenUsageData = (() => {
-    const grouped = new Map<string, number>()
+    const grouped = new Map<string, { tokens: number; cost: number }>()
     usageRecords.forEach((record) => {
-      const date = new Date(record.createdAt).toLocaleDateString()
+      const date = new Date(record.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })
       const tokens = record.tokens || 0
-      grouped.set(date, (grouped.get(date) || 0) + tokens)
+      const cost = Number.parseFloat(record.amount) || 0
+      const existing = grouped.get(date) || { tokens: 0, cost: 0 }
+      grouped.set(date, { tokens: existing.tokens + tokens, cost: existing.cost + cost })
     })
     return Array.from(grouped.entries())
-      .map(([date, tokens]) => ({ date, tokens }))
+      .map(([date, data]) => ({ date, tokens: data.tokens, cost: data.cost }))
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-      .slice(-30)
+      .slice(-14) // Last 14 days
   })()
 
   return (
     <div className="min-h-screen bg-background">
       <header className="bg-card border-b border-border sticky top-0 z-10 relative overflow-hidden">
         {/* Gradient accent line */}
-        {/* <div
+        <div
           className="absolute top-0 left-0 right-0 h-1"
           style={{ background: `linear-gradient(90deg, ${TAILADMIN_BLUE}, ${TAILADMIN_PURPLE})` }}
-        /> */}
+        />
         <div className="px-6 lg:px-8 py-5">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             <div className="flex items-center gap-4">
@@ -210,7 +214,7 @@ export default function AiAnalysis() {
             <Button
               onClick={() => runAnalysis.mutate()}
               disabled={runAnalysis.isPending || remainingBalance <= 0}
-              className="h-12 rounded-xl text-white px-6 shadow-lg transition-all hover:shadow-xl"
+              className="h-12 rounded-xl text-white px-6 shadow-lg transition-all hover:shadow-xl hover:opacity-90"
               style={{
                 background: `linear-gradient(135deg, ${TAILADMIN_BLUE}, ${TAILADMIN_PURPLE})`,
               }}
@@ -252,7 +256,7 @@ export default function AiAnalysis() {
         {runAnalysis.isPending && (
           <Alert className="rounded-xl bg-muted border-border">
             <Loader2 className="h-4 w-4 animate-spin" style={{ color: TAILADMIN_BLUE }} />
-            <AlertDescription className="ml-2">
+            <AlertDescription className="ml-2 text-foreground">
               Fetching transcripts from Voiceflow and analyzing with AI... This may take a few minutes.
             </AlertDescription>
           </Alert>
@@ -265,7 +269,7 @@ export default function AiAnalysis() {
             ))}
           </div>
         ) : analyses.length === 0 ? (
-          <Card className="border-border rounded-3xl overflow-hidden">
+          <Card className="border-border bg-card rounded-3xl overflow-hidden">
             <CardContent className="py-16 text-center relative">
               <div
                 className="absolute inset-0 opacity-5"
@@ -286,7 +290,7 @@ export default function AiAnalysis() {
               <Button
                 onClick={() => runAnalysis.mutate()}
                 disabled={runAnalysis.isPending || remainingBalance <= 0}
-                className="h-12 rounded-xl text-white px-8"
+                className="h-12 rounded-xl text-white px-8 hover:opacity-90"
                 style={{ background: `linear-gradient(135deg, ${TAILADMIN_BLUE}, ${TAILADMIN_PURPLE})` }}
               >
                 <Sparkles className="h-5 w-5 mr-2" />
@@ -296,7 +300,7 @@ export default function AiAnalysis() {
           </Card>
         ) : (
           <>
-            <Card className="border-border rounded-3xl shadow-sm">
+            <Card className="border-border bg-card rounded-3xl shadow-sm">
               <CardHeader className="px-6 pt-6 pb-4">
                 <div className="flex items-center gap-3">
                   <div
@@ -305,7 +309,7 @@ export default function AiAnalysis() {
                   >
                     <CalendarIcon className="w-5 h-5" style={{ color: TAILADMIN_BLUE }} />
                   </div>
-                  <CardTitle className="text-lg font-semibold">Filter Analyses by Date</CardTitle>
+                  <CardTitle className="text-lg font-semibold text-foreground">Filter Analyses by Date</CardTitle>
                 </div>
               </CardHeader>
               <CardContent className="px-6 pb-6">
@@ -316,13 +320,13 @@ export default function AiAnalysis() {
                       <PopoverTrigger asChild>
                         <Button
                           variant="outline"
-                          className="w-full justify-start h-11 rounded-xl border-border hover:bg-muted bg-transparent"
+                          className="w-full justify-start h-11 rounded-xl border-border hover:bg-muted bg-transparent text-foreground"
                         >
                           <CalendarIcon className="mr-2 h-4 w-4 text-muted-foreground" />
                           {startDate ? format(startDate, "PPP") : "Pick a date"}
                         </Button>
                       </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0">
+                      <PopoverContent className="w-auto p-0 bg-card border-border">
                         <Calendar mode="single" selected={startDate} onSelect={setStartDate} initialFocus />
                       </PopoverContent>
                     </Popover>
@@ -333,13 +337,13 @@ export default function AiAnalysis() {
                       <PopoverTrigger asChild>
                         <Button
                           variant="outline"
-                          className="w-full justify-start h-11 rounded-xl border-border hover:bg-muted bg-transparent"
+                          className="w-full justify-start h-11 rounded-xl border-border hover:bg-muted bg-transparent text-foreground"
                         >
                           <CalendarIcon className="mr-2 h-4 w-4 text-muted-foreground" />
                           {endDate ? format(endDate, "PPP") : "Pick a date"}
                         </Button>
                       </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0">
+                      <PopoverContent className="w-auto p-0 bg-card border-border">
                         <Calendar mode="single" selected={endDate} onSelect={setEndDate} initialFocus />
                       </PopoverContent>
                     </Popover>
@@ -350,7 +354,7 @@ export default function AiAnalysis() {
                       setStartDate(undefined)
                       setEndDate(undefined)
                     }}
-                    className="h-11 rounded-xl border-border hover:bg-muted"
+                    className="h-11 rounded-xl border-border hover:bg-muted bg-transparent text-foreground"
                   >
                     Clear
                   </Button>
@@ -358,20 +362,9 @@ export default function AiAnalysis() {
               </CardContent>
             </Card>
 
-            <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
-              {/* Token Usage Chart */}
-              <div className="xl:col-span-1">
-                <TailAdminBarChart
-                  title="AI Token Usage"
-                  data={tokenUsageData.map((d) => ({
-                    name: d.date,
-                    value: d.tokens,
-                  }))}
-                  height={250}
-                />
-              </div>
-
-              <Card className="border-border rounded-3xl shadow-sm hover:shadow-md transition-all xl:col-span-3 overflow-hidden">
+            <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+              {/* Analysis History card - takes 2 columns */}
+              <Card className="border-border bg-card rounded-3xl shadow-sm hover:shadow-md transition-all xl:col-span-2 overflow-hidden relative">
                 <div
                   className="absolute top-0 left-0 right-0 h-1 opacity-50"
                   style={{ background: `linear-gradient(90deg, ${TAILADMIN_BLUE}, ${TAILADMIN_PURPLE})` }}
@@ -385,15 +378,17 @@ export default function AiAnalysis() {
                       <Activity className="w-5 h-5" style={{ color: TAILADMIN_BLUE }} />
                     </div>
                     <div>
-                      <CardTitle className="text-base font-semibold">
+                      <CardTitle className="text-base font-semibold text-foreground">
                         Analysis History ({filteredAnalyses.length})
                       </CardTitle>
-                      <CardDescription className="text-xs">Click an analysis to view details</CardDescription>
+                      <CardDescription className="text-xs text-muted-foreground">
+                        Click an analysis to view details
+                      </CardDescription>
                     </div>
                   </div>
                 </CardHeader>
                 <CardContent className="px-6 pb-6">
-                  <ScrollArea className="h-[200px]">
+                  <ScrollArea className="h-[250px]">
                     <div className="space-y-3">
                       {sortedAnalyses.length === 0 ? (
                         <div className="text-center py-8 text-muted-foreground">
@@ -405,8 +400,8 @@ export default function AiAnalysis() {
                             key={analysis.id}
                             className={`p-4 rounded-2xl border cursor-pointer transition-all hover:shadow-md ${
                               selectedAnalysisId === analysis.id
-                                ? "border-2 bg-gradient-to-r from-blue-50/50 to-purple-50/50 dark:from-blue-950/30 dark:to-purple-950/30"
-                                : "border-border hover:border-muted-foreground/30"
+                                ? "border-2 bg-blue-50/50 dark:bg-blue-950/30"
+                                : "border-border bg-card hover:border-blue-300 dark:hover:border-blue-700 hover:bg-muted/50"
                             }`}
                             style={selectedAnalysisId === analysis.id ? { borderColor: TAILADMIN_BLUE } : {}}
                             onClick={() => setSelectedAnalysisId(analysis.id)}
@@ -451,12 +446,52 @@ export default function AiAnalysis() {
                   </ScrollArea>
                 </CardContent>
               </Card>
+
+              <Card className="border-border bg-card rounded-3xl shadow-sm overflow-hidden relative">
+                <div
+                  className="absolute top-0 left-0 right-0 h-1 opacity-50"
+                  style={{ background: `linear-gradient(90deg, ${TAILADMIN_PURPLE}, ${TAILADMIN_EMERALD})` }}
+                />
+                <CardHeader className="px-6 pt-6 pb-4">
+                  <div className="flex items-center gap-3">
+                    <div
+                      className="w-10 h-10 rounded-xl flex items-center justify-center"
+                      style={{ background: `linear-gradient(135deg, ${TAILADMIN_PURPLE}15, ${TAILADMIN_EMERALD}15)` }}
+                    >
+                      <BarChart3 className="w-5 h-5" style={{ color: TAILADMIN_PURPLE }} />
+                    </div>
+                    <div>
+                      <CardTitle className="text-base font-semibold text-foreground">Token Usage</CardTitle>
+                      <CardDescription className="text-xs text-muted-foreground">
+                        Daily AI token consumption
+                      </CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="px-4 pb-4">
+                  {tokenUsageData.length > 0 ? (
+                    <TailAdminBarChart
+                      title=""
+                      data={tokenUsageData.map((d) => ({
+                        name: d.date,
+                        value: d.tokens,
+                      }))}
+                      height={200}
+                      series1Label="Tokens"
+                    />
+                  ) : (
+                    <div className="h-[200px] flex items-center justify-center text-muted-foreground text-sm">
+                      No token usage data available
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
             </div>
 
             {selectedAnalysisId && analysisDetails && !isLoadingDetails && (
               <div className="grid gap-6 md:grid-cols-3">
                 {/* Conversion Rate Card */}
-                <Card className="border-border rounded-3xl overflow-hidden shadow-sm hover:shadow-md transition-all">
+                <Card className="border-border bg-card rounded-3xl overflow-hidden shadow-sm hover:shadow-md transition-all">
                   <div
                     className="h-1"
                     style={{ background: `linear-gradient(90deg, ${TAILADMIN_BLUE}, ${TAILADMIN_BLUE}80)` }}
@@ -479,7 +514,7 @@ export default function AiAnalysis() {
                 </Card>
 
                 {/* Sentiment Card */}
-                <Card className="border-border rounded-3xl overflow-hidden shadow-sm hover:shadow-md transition-all">
+                <Card className="border-border bg-card rounded-3xl overflow-hidden shadow-sm hover:shadow-md transition-all">
                   <div
                     className="h-1"
                     style={{ background: `linear-gradient(90deg, ${TAILADMIN_EMERALD}, ${TAILADMIN_EMERALD}80)` }}
@@ -506,7 +541,7 @@ export default function AiAnalysis() {
                 </Card>
 
                 {/* Transcripts Card */}
-                <Card className="border-border rounded-3xl overflow-hidden shadow-sm hover:shadow-md transition-all">
+                <Card className="border-border bg-card rounded-3xl overflow-hidden shadow-sm hover:shadow-md transition-all">
                   <div
                     className="h-1"
                     style={{ background: `linear-gradient(90deg, ${TAILADMIN_PURPLE}, ${TAILADMIN_PURPLE}80)` }}
@@ -557,7 +592,6 @@ export default function AiAnalysis() {
                   </div>
                 </div>
 
-                {/* Secondary advanced hexagon chart */}
                 <div className="bg-card rounded-3xl border border-border overflow-hidden shadow-sm hover:shadow-md transition-all">
                   <div
                     className="h-1"
@@ -569,20 +603,42 @@ export default function AiAnalysis() {
                         className="w-10 h-10 rounded-xl flex items-center justify-center"
                         style={{ background: `linear-gradient(135deg, ${TAILADMIN_PURPLE}15, ${TAILADMIN_BLUE}15)` }}
                       >
-                        <Brain className="w-5 h-5" style={{ color: TAILADMIN_PURPLE }} />
+                        <Activity className="w-5 h-5" style={{ color: TAILADMIN_PURPLE }} />
                       </div>
                       <div>
-                        <h3 className="text-lg font-semibold text-foreground">Advanced Analysis</h3>
-                        <p className="text-sm text-muted-foreground">Comparative keyword insights</p>
+                        <h3 className="text-lg font-semibold text-foreground">Analysis Trends</h3>
+                        <p className="text-sm text-muted-foreground">Conversion rate and sentiment over time</p>
                       </div>
                     </div>
                   </div>
                   <div className="p-6">
-                    <AdvancedHexagonChart keywords={analysisDetails.keywords} />
+                    {sortedAnalyses.length > 1 ? (
+                      <TailAdminSmoothLineChart
+                        title=""
+                        data={sortedAnalyses
+                          .slice(0, 12)
+                          .reverse()
+                          .map((a) => ({
+                            name: new Date(a.analysisDate).toLocaleDateString("en-US", {
+                              month: "short",
+                              day: "numeric",
+                            }),
+                            value1: Math.round(a.conversionRate * 100),
+                            value2: Math.round((a.averageSentiment + 1) * 50), // Normalize -1 to 1 => 0 to 100
+                          }))}
+                        height={300}
+                        series1Label="Conversion %"
+                        series2Label="Sentiment Score"
+                      />
+                    ) : (
+                      <div className="h-[300px] flex items-center justify-center text-muted-foreground">
+                        Run more analyses to see trends
+                      </div>
+                    )}
                   </div>
                 </div>
 
-                {/* Key Phrases Card */}
+                {/* Key Phrases with Advanced Hexagon Chart */}
                 <div className="bg-card rounded-3xl border border-border overflow-hidden shadow-sm hover:shadow-md transition-all lg:col-span-2">
                   <div
                     className="h-1"
@@ -601,50 +657,70 @@ export default function AiAnalysis() {
                       <div>
                         <h3 className="text-lg font-semibold text-foreground">Key Phrases</h3>
                         <p className="text-sm text-muted-foreground">
-                          Common expressions and patterns found in conversations
+                          Important phrases and expressions found in conversations
                         </p>
                       </div>
                     </div>
                   </div>
                   <div className="p-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {analysisDetails.keyphrases?.slice(0, 15).map((kp) => (
-                        <div
-                          key={kp.id}
-                          className="p-4 bg-muted/30 rounded-2xl hover:bg-muted/50 transition-colors border border-transparent hover:border-border"
-                        >
-                          <div className="flex items-start justify-between mb-2">
-                            <p className="text-sm font-medium text-foreground flex-1">{kp.keyphrase}</p>
-                            <Badge
-                              variant="outline"
-                              className="rounded-lg ml-2 flex-shrink-0"
-                              style={{
-                                borderColor: TAILADMIN_BLUE,
-                                color: TAILADMIN_BLUE,
-                              }}
-                            >
-                              {kp.frequency}x
-                            </Badge>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <div className="h-2 flex-1 bg-muted rounded-full overflow-hidden">
+                    {analysisDetails.keyphrases && analysisDetails.keyphrases.length > 0 ? (
+                      <div className="grid gap-6 lg:grid-cols-2">
+                        {/* Advanced Hexagon Chart for keyphrases */}
+                        <div className="lg:col-span-1">
+                          <AdvancedHexagonChart
+                            keywords={analysisDetails.keyphrases.slice(0, 6).map((kp) => ({
+                              id: kp.id,
+                              keyword: kp.keyphrase,
+                              frequency: kp.frequency,
+                              relevanceScore: kp.relevanceScore,
+                            }))}
+                            height={280}
+                            showLegend={true}
+                          />
+                        </div>
+                        {/* Keyphrase list */}
+                        <div className="lg:col-span-1">
+                          <div className="grid gap-3 sm:grid-cols-2">
+                            {analysisDetails.keyphrases.slice(0, 8).map((kp) => (
                               <div
-                                className="h-full rounded-full transition-all"
-                                style={{
-                                  width: `${Math.min((kp.relevanceScore || 0) * 100, 100)}%`,
-                                  background: `linear-gradient(90deg, ${TAILADMIN_BLUE}, ${TAILADMIN_PURPLE})`,
-                                }}
-                              />
-                            </div>
-                            <span className="text-xs text-muted-foreground">
-                              {(kp.relevanceScore * 100).toFixed(0)}%
-                            </span>
+                                key={kp.id}
+                                className="p-4 rounded-xl border border-border bg-muted/30 hover:bg-muted/50 transition-colors"
+                              >
+                                <div className="flex items-start justify-between gap-2 mb-2">
+                                  <span className="font-medium text-foreground text-sm">{kp.keyphrase}</span>
+                                  <Badge
+                                    variant="secondary"
+                                    className="text-xs bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300"
+                                  >
+                                    {Math.round(kp.relevanceScore * 100)}%
+                                  </Badge>
+                                </div>
+                                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                  <span>Frequency: {kp.frequency}</span>
+                                </div>
+                                {kp.context && (
+                                  <p className="mt-2 text-xs text-muted-foreground line-clamp-2">{kp.context}</p>
+                                )}
+                              </div>
+                            ))}
                           </div>
                         </div>
-                      ))}
-                    </div>
+                      </div>
+                    ) : (
+                      <div className="text-center py-8 text-muted-foreground">
+                        No key phrases available for this analysis
+                      </div>
+                    )}
                   </div>
                 </div>
+              </div>
+            )}
+
+            {isLoadingDetails && selectedAnalysisId && (
+              <div className="grid gap-6 md:grid-cols-3">
+                {[1, 2, 3].map((i) => (
+                  <Skeleton key={i} className="h-40 rounded-3xl" />
+                ))}
               </div>
             )}
           </>

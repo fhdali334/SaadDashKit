@@ -14,7 +14,7 @@ import { loadStripe, type Stripe } from "@stripe/stripe-js"
 import { Elements, PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 
-const TAILADMIN_BLUE = "#465FFF"
+const TAILADMIN_BLUE = "#3b82f6"
 
 // Only initialize Stripe if a publishable key is available
 function getStripePromise(): Promise<Stripe | null> | null {
@@ -123,14 +123,14 @@ function PaymentForm({
           variant="outline"
           onClick={onCancel}
           disabled={isProcessing}
-          className="flex-1 order-2 sm:order-1 bg-transparent"
+          className="flex-1 order-2 sm:order-1 bg-transparent border-border hover:bg-muted"
         >
           Cancel
         </Button>
         <Button
           type="submit"
           disabled={!stripe || isProcessing}
-          className="flex-1 order-1 sm:order-2 text-white"
+          className="flex-1 order-1 sm:order-2 text-white hover:opacity-90"
           style={{ backgroundColor: TAILADMIN_BLUE }}
         >
           {isProcessing ? "Processing..." : `Pay $${price}/month`}
@@ -257,11 +257,11 @@ export function PlanSelector({ plans, selectedPlanId, onSelectPlan }: PlanSelect
                   key={plan.id}
                   type="button"
                   className={`
-                    relative h-auto p-3 sm:p-4 flex flex-col items-center gap-2 rounded-lg border-2 transition-all
+                    relative h-auto p-3 sm:p-4 flex flex-col items-center gap-2 rounded-xl border-2 transition-all
                     ${
                       isSelected
-                        ? "border-[#465FFF] bg-blue-50/50 dark:bg-blue-950/30"
-                        : "border-border bg-card hover:border-muted-foreground/30 hover:bg-muted/50"
+                        ? "border-blue-500 bg-blue-50 dark:bg-blue-950/40"
+                        : "border-border bg-card hover:border-blue-300 dark:hover:border-blue-700 hover:bg-muted/50 dark:hover:bg-muted/30"
                     }
                   `}
                   onClick={() => handlePlanClick(plan)}
@@ -288,11 +288,11 @@ export function PlanSelector({ plans, selectedPlanId, onSelectPlan }: PlanSelect
                   </span>
                   <Badge
                     variant="secondary"
-                    className="mt-1 flex items-center gap-1 text-xs"
-                    style={{
-                      backgroundColor: isSelected ? "rgba(70, 95, 255, 0.15)" : undefined,
-                      color: isSelected ? TAILADMIN_BLUE : undefined,
-                    }}
+                    className={`mt-1 flex items-center gap-1 text-xs ${
+                      isSelected
+                        ? "bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300"
+                        : "bg-muted text-muted-foreground"
+                    }`}
                   >
                     <Zap className="w-3 h-3" />
                     {plan.voiceflowCredits.toLocaleString()} credits
@@ -312,10 +312,12 @@ export function PlanSelector({ plans, selectedPlanId, onSelectPlan }: PlanSelect
 
       {showPaymentDialog && selectedPlan && clientSecret && (
         <Dialog open={showPaymentDialog} onOpenChange={setShowPaymentDialog}>
-          <DialogContent className="w-[95vw] max-w-md mx-auto">
+          <DialogContent className="w-[95vw] max-w-md mx-auto bg-card border-border">
             <DialogHeader>
-              <DialogTitle className="text-base sm:text-lg">Subscribe to {selectedPlan.name}</DialogTitle>
-              <DialogDescription className="text-sm">
+              <DialogTitle className="text-base sm:text-lg text-foreground">
+                Subscribe to {selectedPlan.name}
+              </DialogTitle>
+              <DialogDescription className="text-sm text-muted-foreground">
                 Complete your payment to upgrade to the {selectedPlan.name} plan.
               </DialogDescription>
             </DialogHeader>

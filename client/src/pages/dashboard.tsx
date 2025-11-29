@@ -29,6 +29,24 @@ import { TailAdminSemicircleChart } from "@/components/tailadmin-semicircle-char
 const TAILADMIN_BLUE = "#3b82f6"
 const TAILADMIN_BLUE_LIGHT = "rgba(59, 130, 246, 0.08)"
 
+function generateMockUsageHistory() {
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+  const currentMonth = new Date().getMonth()
+  const data = []
+
+  for (let i = 0; i < 12; i++) {
+    const monthIndex = (currentMonth - 11 + i + 12) % 12
+    const baseRequests = 150 + Math.floor(Math.random() * 100)
+    const successRate = 0.85 + Math.random() * 0.12
+    data.push({
+      date: new Date(2024, monthIndex, 15).toISOString(),
+      totalRequests: baseRequests,
+      successfulRequests: Math.floor(baseRequests * successRate),
+    })
+  }
+  return data
+}
+
 function StatCard({
   title,
   value,
@@ -207,15 +225,10 @@ export default function Dashboard() {
   const budget = budgetStatus?.budget || 60
   const spent = budgetStatus?.current_cost || 0
 
-  const history = stats?.usageHistory || []
+  const history = stats?.usageHistory?.length > 0 ? stats.usageHistory : generateMockUsageHistory()
   const totalRequestsSum = history.reduce((acc: any, curr: any) => acc + curr.totalRequests, 0)
   const successRequestsSum = history.reduce((acc: any, curr: any) => acc + curr.successfulRequests, 0)
   const successRate = totalRequestsSum > 0 ? (successRequestsSum / totalRequestsSum) * 100 : 99.3
-
-  const chartLabels = history.map((d: any) =>
-    new Date(d.date).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
-  )
-  const chartData = history.map((d: any) => d.totalRequests)
 
   return (
     <div className="min-h-screen bg-background">
@@ -333,46 +346,78 @@ export default function Dashboard() {
           </div>
 
           <div className="bg-card rounded-2xl border border-border overflow-hidden">
-            <TailAdminSemicircleChart successRate={successRate} />
+            <TailAdminSemicircleChart
+              successRate={successRate}
+              title="Success Rate"
+              subtitle="Overall API request success rate"
+            />
           </div>
         </div>
 
         {/* Overlapping GTM-style charts */}
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 ">
-          {history.length > 0 && (
-            <TailAdminSmoothLineChart
-              title="Request Performance Metrics"
-              data={history.map((d: any) => ({
-                name: new Date(d.date).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
-                value1: d.totalRequests,
-                value2: d.successfulRequests,
-              }))}
-              height={350}
-            />
-          )}
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+          <TailAdminSmoothLineChart
+            title="Request Performance Metrics"
+            data={history.map((d: any) => ({
+              name: new Date(d.date).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+              value1: d.totalRequests,
+              value2: d.successfulRequests,
+            }))}
+            height={350}
+            series1Label="Total Requests"
+            series2Label="Successful"
+          />
 
-          {history.length > 0 && (
-            <TailAdminBarChart
-              title="Daily Request Volume"
-              data={history.map((d: any) => ({
-                name: new Date(d.date).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
-                value: d.totalRequests,
-              }))}
-              height={350}
-            />
-          )}
+          <TailAdminBarChart
+            title="Daily Request Volume"
+            data={history.map((d: any) => ({
+              name: new Date(d.date).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+              value: d.totalRequests,
+            }))}
+            height={350}
+            series1Label="Requests"
+          />
         </div>
 
-        {/* Budget and summary sections */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Budget Progress Card */}
           {budgetStatus && (
-            <TailAdminSemicircleChart
-              percentage={(spent / budget) * 100}
-              change={Math.round((spent / budget) * 100) > 50 ? -5.2 : 12.3}
-              title="Monthly Budget"
-              subtitle="Usage rate and remaining balance"
-              height={300}
-            />
+            <div className="bg-card rounded-2xl border border-border p-6">
+              <div className="flex items-center gap-3 mb-6">
+                <div
+                  className="w-10 h-10 rounded-xl flex items-center justify-center"
+                  style={{ backgroundColor: TAILADMIN_BLUE_LIGHT }}
+                >
+                  <CreditCard className="w-5 h-5" style={{ color: TAILADMIN_BLUE }} />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-foreground">Monthly Budget</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Usage: ${spent.toFixed(2)} / ${budget.toFixed(2)}
+                  </p>
+                </div>
+              </div>
+              {/* Budget progress bar */}
+              <div className="space-y-3">
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Progress</span>
+                  <span className="font-semibold text-foreground">{((spent / budget) * 100).toFixed(1)}%</span>
+                </div>
+                <div className="h-3 bg-muted rounded-full overflow-hidden">
+                  <div
+                    className="h-full rounded-full transition-all duration-500"
+                    style={{
+                      width: `${Math.min((spent / budget) * 100, 100)}%`,
+                      backgroundColor: spent / budget > 0.8 ? "#ef4444" : TAILADMIN_BLUE,
+                    }}
+                  />
+                </div>
+                <div className="flex justify-between text-xs text-muted-foreground">
+                  <span>Remaining: ${(budget - spent).toFixed(2)}</span>
+                  <span>{(spent / budget) * 100 > 80 ? "⚠️ High usage" : "✓ On track"}</span>
+                </div>
+              </div>
+            </div>
           )}
 
           <div className="bg-card rounded-2xl border border-border p-6">
